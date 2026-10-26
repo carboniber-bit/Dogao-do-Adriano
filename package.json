@@ -1,0 +1,7 @@
+{
+  "name": "dogao-do-adriano",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site de pedidos do Dogão do Adriano",
+  "engines": { "node": ">=18" }
+}

@@ -1,0 +1,50 @@
+{
+  "whatsapp": "5511990173256",
+  "taxaEntrega": 0,
+  "categorias": [
+    { "id": "tradicional", "nome": "Tradicional" },
+    { "id": "baguete", "nome": "Baguete" },
+    { "id": "prato", "nome": "No Prato" },
+    { "id": "prensado", "nome": "Prensado" },
+    { "id": "gigante", "nome": "Baguete Gigante" },
+    { "id": "adicionais", "nome": "Adicionais" },
+    { "id": "bebidas", "nome": "Bebidas" }
+  ],
+  "itens": [
+    { "id": "t1", "cat": "tradicional", "nome": "Dogão Tradicional Completo", "desc": "Pão, 2 salsichas Sadia, milho, repolho, tomate, batata palha, maionese, mostarda, catchup, purê de batata caseiro, cheddar, catupiry e queijo ralado.", "preco": 11.00, "paes": ["Banha", "Sal"], "verificar": true },
+    { "id": "t2", "cat": "tradicional", "nome": "Dogão Tradicional Simples", "desc": "Pão, 2 salsichas Sadia, milho, repolho, tomate, batata palha, maionese, mostarda, catchup e purê de batata caseiro.", "preco": 9.00, "paes": ["Banha", "Sal"], "verificar": true },
+    { "id": "t3", "cat": "tradicional", "nome": "Dogão Tradicional Kid's Simples", "desc": "Pão, 1 salsicha Sadia, catchup, batata palha e purê de batata caseiro.", "preco": 7.00, "paes": ["Banha", "Sal"], "verificar": true },
+
+    { "id": "b10", "cat": "baguete", "nome": "Baguetão Tradicional", "desc": "Pão, 2 salsichas Sadia, milho, repolho, tomate, batata palha, maionese, mostarda, catchup, purê de batata caseiro, cheddar e catupiry.", "preco": 23.00 },
+    { "id": "b11", "cat": "baguete", "nome": "Baguetão Prensado", "desc": "Pão, 2 salsichas Sadia, bacon, milho, repolho, tomate, batata palha, maionese, mostarda, catchup, purê de batata caseiro e cheddar.", "preco": 24.00 },
+
+    { "id": "p15", "cat": "prato", "nome": "Dogão no Prato 15 cm (sem bacon)", "desc": "Pão, 2 salsichas Sadia, milho, repolho, tomate, batata palha, maionese, mostarda, catchup, purê de batata caseiro, cheddar, catupiry e queijo ralado. Acompanha refrigerante pequeno de brinde.", "preco": 15.00, "verificar": true },
+    { "id": "p15b", "cat": "prato", "nome": "Dogão no Prato 15 cm (com bacon)", "desc": "Igual ao 15 cm, com bacon. Acompanha refrigerante pequeno de brinde.", "preco": 18.00, "verificar": true },
+    { "id": "p21", "cat": "prato", "nome": "Dogão no Prato 21 cm (sem bacon)", "desc": "Pão, 3 salsichas Sadia, milho, repolho, tomate, batata palha, maionese, mostarda, catchup, purê de batata caseiro, cheddar, catupiry e queijo ralado. Acompanha refrigerante pequeno de brinde.", "preco": 17.00, "verificar": true },
+    { "id": "p21b", "cat": "prato", "nome": "Dogão no Prato 21 cm (com bacon)", "desc": "Igual ao 21 cm, com bacon. Acompanha refrigerante pequeno de brinde.", "preco": 20.00, "verificar": true },
+
+    { "id": "pr10", "cat": "prensado", "nome": "Pão de Banha ou Sal Prensado", "desc": "Pão, 1 salsicha Sadia, bacon, milho, repolho, tomate, batata palha, maionese, mostarda, catchup, purê de batata caseiro, cheddar, catupiry e queijo ralado.", "preco": 11.00, "paes": ["Banha", "Sal"], "verificar": true },
+    { "id": "pr11", "cat": "prensado", "nome": "Dogão Kid's Prensado", "desc": "Pão, 1 salsicha Sadia, batata palha, purê de batata caseiro e catchup.", "preco": 7.00, "verificar": true },
+
+    { "id": "g60", "cat": "gigante", "nome": "Baguete Gigante 60 cm", "desc": "Pão, 8 salsichas Sadia, milho, repolho, tomate, batata palha, maionese, mostarda, catchup, purê de batata caseiro, cheddar e catupiry.", "preco": 80.00, "encomenda": "Sob encomenda" },
+    { "id": "g100", "cat": "gigante", "nome": "Baguete Gigante 1 metro", "desc": "Pão, 12 salsichas Sadia, milho, repolho, tomate, batata palha, maionese, mostarda, catchup, purê de batata caseiro, cheddar e catupiry. Consumo no local, por encomenda antecipada.", "preco": 125.00, "encomenda": "Consumo no local, por encomenda antecipada" },
+    { "id": "g200", "cat": "gigante", "nome": "Baguete Gigante 2 metros", "desc": "Pão, 24 salsichas Sadia, milho, repolho, tomate, batata palha, maionese, mostarda, catchup, purê de batata caseiro, cheddar e catupiry. Consumo no local, por encomenda antecipada.", "preco": 210.00, "encomenda": "Consumo no local, por encomenda antecipada" },
+
+    { "id": "a1", "cat": "adicionais", "nome": "Bacon", "desc": "Adicional para o seu dogão.", "preco": 6.00 },
+    { "id": "a2", "cat": "adicionais", "nome": "Purê", "desc": "Adicional para o seu dogão.", "preco": 6.00 },
+    { "id": "a3", "cat": "adicionais", "nome": "Salsicha", "desc": "Adicional para o seu dogão.", "preco": 2.00 },
+    { "id": "a4", "cat": "adicionais", "nome": "Queijo ralado", "desc": "Adicional para o seu dogão.", "preco": 2.00 },
+
+    { "id": "d1", "cat": "bebidas", "nome": "Lata 350 ml", "desc": "Refrigerante em lata.", "preco": 8.00 },
+    { "id": "d2", "cat": "bebidas", "nome": "Refrigerante 600 ml", "desc": "", "preco": 9.00 },
+    { "id": "d3", "cat": "bebidas", "nome": "Refrigerante 1 litro", "desc": "", "preco": 11.00 },
+    { "id": "d4", "cat": "bebidas", "nome": "Refrigerante 1,5 litro", "desc": "", "preco": 12.00 },
+    { "id": "d5", "cat": "bebidas", "nome": "Refrigerante 2 litros", "desc": "", "preco": 15.00 },
+    { "id": "d6", "cat": "bebidas", "nome": "Suco Del Valle 290 ml", "desc": "", "preco": 8.00 },
+    { "id": "d7", "cat": "bebidas", "nome": "Suco Life 300 ml", "desc": "", "preco": 8.00 },
+    { "id": "d8", "cat": "bebidas", "nome": "Suco Life 900 ml", "desc": "", "preco": 14.00, "verificar": true },
+    { "id": "d9", "cat": "bebidas", "nome": "Suco Life 1,7 litros", "desc": "", "preco": 18.00, "verificar": true },
+    { "id": "d10", "cat": "bebidas", "nome": "Cerveja lata 350 ml", "desc": "Venda para maiores de 18 anos.", "preco": 9.00, "verificar": true },
+    { "id": "d11", "cat": "bebidas", "nome": "Água", "desc": "", "preco": 4.00, "verificar": true }
+  ]
+}

@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dogão do Adriano — O melhor hot dog da sua vida</title>
+<meta name="description" content="Dogão do Adriano: hot dog tradicional, baguete, no prato e prensado na Praça de Santo Antônio, Osasco. Peça online e pague por Pix ou cartão.">
+<meta name="theme-color" content="#c8281e">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fff8ea; --surface:#ffffff; --ink:#2a1a12; --muted:#6f5a4d;
+  --red:#c8281e; --red-d:#a31d15; --mustard:#f5b82e; --line:#ecdcc2; --ok:#1c8a4a;
+  --shadow:0 8px 24px rgba(42,26,18,.10);
+  --display:"Anton","Impact",sans-serif; --body:"DM Sans",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#1c120d;--surface:#2a1b14;--ink:#fff3e0;--muted:#cbb7a4;--line:#443024;--shadow:0 8px 24px rgba(0,0,0,.4);--ok:#4cc97f}
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+h1,h2,h3{font-family:var(--display);font-weight:400;letter-spacing:.02em;line-height:1.05}
+:focus-visible{outline:3px solid var(--mustard);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+header{position:sticky;top:0;z-index:20;background:var(--red);color:#fff;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
+.logo{font-family:var(--display);font-size:1.45rem;letter-spacing:.03em;text-decoration:none;display:flex;gap:8px;align-items:center;white-space:nowrap}
+.logo b{color:var(--mustard);font-weight:400}
+nav{display:none;gap:22px;font-weight:700;font-size:.95rem}
+nav a{text-decoration:none;opacity:.92}nav a:hover{opacity:1;text-decoration:underline}
+.cart-btn{background:var(--mustard);color:#2a1a12;border:0;border-radius:999px;padding:10px 16px;font:700 .95rem var(--body);cursor:pointer;display:flex;gap:8px;align-items:center;min-height:44px}
+.cart-btn .n{background:#2a1a12;color:var(--mustard);border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;font-size:.8rem;padding:0 6px}
+@media(min-width:760px){nav{display:flex}}
+@media(max-width:480px){.logo{font-size:1.2rem}.cart-btn .t{display:none}.cart-btn{padding:10px 14px}}
+
+.hero{background:radial-gradient(circle at 85% 20%,rgba(245,184,46,.35),transparent 45%),linear-gradient(160deg,#c8281e 0%,#8f160f 100%);color:#fff;padding:44px 0 56px;overflow:hidden}
+.hero .wrap{display:grid;gap:28px;align-items:center}
+.badge{display:inline-flex;gap:8px;align-items:center;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:6px 14px;font-weight:700;font-size:.85rem}
+.hero h1{font-size:clamp(2.5rem,9.5vw,5.4rem);margin:14px 0 12px}
+.hero h1 span{color:var(--mustard)}
+.hero p{max-width:36ch;font-size:1.1rem;opacity:.95}
+.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;padding:14px 22px;font:700 1rem var(--body);text-decoration:none;border:2px solid transparent;cursor:pointer;min-height:48px}
+.btn-y{background:var(--mustard);color:#2a1a12}.btn-y:hover{filter:brightness(1.05)}
+.btn-o{border-color:rgba(255,255,255,.7);color:#fff}.btn-o:hover{background:rgba(255,255,255,.12)}
+.hero-art{justify-self:center;width:min(100%,380px)}
+@media(min-width:820px){.hero .wrap{grid-template-columns:1.2fr .8fr}.hero{padding:70px 0 80px}}
+
+.strip{background:var(--mustard);color:#2a1a12;font-weight:700}
+.strip .wrap{display:flex;flex-wrap:wrap;gap:8px 28px;justify-content:center;padding-top:12px;padding-bottom:12px;font-size:.95rem}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#999;margin-right:6px}
+.dot.on{background:var(--ok)} .dot.off{background:var(--red)}
+
+section{padding:52px 0}
+.sec-h{font-size:clamp(2rem,6vw,2.8rem);margin-bottom:6px}
+.sec-sub{color:var(--muted);margin-bottom:24px}
+
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:18px;scrollbar-width:thin;position:sticky;top:60px;background:var(--bg);z-index:5;padding-top:8px}
+.tab{flex:none;border:2px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:9px 18px;font:700 .95rem var(--body);cursor:pointer;min-height:44px}
+.tab[aria-selected="true"]{background:var(--red);border-color:var(--red);color:#fff}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.item{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow)}
+.item h3{font-size:1.3rem}
+.item p{color:var(--muted);font-size:.9rem}
+.tag{align-self:flex-start;background:var(--mustard);color:#2a1a12;font-size:.75rem;font-weight:700;border-radius:999px;padding:2px 10px}
+.item .row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:auto;padding-top:10px;flex-wrap:wrap}
+.price{font-weight:700;font-size:1.15rem;color:var(--red)}
+@media(prefers-color-scheme:dark){.price,.card h3{color:var(--mustard)}}
+.acts{display:flex;gap:8px;align-items:center}
+select{font:inherit;font-size:.9rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;min-height:40px}
+.add{background:var(--red);color:#fff;border:0;border-radius:10px;padding:9px 14px;font:700 .9rem var(--body);cursor:pointer;min-height:40px}
+.add:hover{background:var(--red-d)}
+.add.alt{background:#1faa59}
+.note{margin-top:18px;font-size:.88rem;color:var(--muted)}
+
+.info{background:var(--surface);border-block:1px solid var(--line)}
+.cards{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.card{background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:20px}
+.card h3{font-size:1.25rem;margin-bottom:8px;color:var(--red)}
+.stars{color:#e8a600;letter-spacing:2px}
+footer{background:#2a1a12;color:#f3e3cc;padding:30px 0;font-size:.9rem;text-align:center}
+footer a{color:var(--mustard)}
+
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+.overlay.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(440px,100%);background:var(--surface);z-index:50;transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column;box-shadow:-10px 0 30px rgba(0,0,0,.25);visibility:hidden}
+.drawer.on{transform:none;visibility:visible}
+.d-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line)}
+.d-head h2{font-size:1.6rem}
+.x{background:none;border:0;font-size:1.8rem;cursor:pointer;color:var(--ink);width:44px;height:44px}
+.d-body{flex:1;overflow:auto;padding:16px}
+.empty{color:var(--muted);text-align:center;padding:40px 10px}
+.line{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
+.line b{display:block}.line small{color:var(--muted)}
+.qty{display:flex;align-items:center;gap:10px;margin-top:6px}
+.qty button{width:36px;height:36px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:1.1rem;cursor:pointer}
+fieldset{border:0;padding:0;margin-top:16px;display:grid;gap:10px}
+label{font-weight:700;font-size:.9rem;display:grid;gap:4px}
+input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px;width:100%;min-height:44px}
+.seg{display:flex;gap:8px}
+.seg label{flex:1;display:block;font-weight:500;position:relative}
+.seg input{position:absolute;opacity:0;width:0;min-height:0}
+.seg span{display:block;text-align:center;border:2px solid var(--line);border-radius:10px;padding:10px;cursor:pointer;font-weight:700}
+.seg input:checked+span{border-color:var(--red);background:var(--red);color:#fff}
+.seg input:focus-visible+span{outline:3px solid var(--mustard)}
+.aviso{font-size:.85rem;border-radius:10px;padding:10px 12px;background:rgba(200,40,30,.1);border:1px solid rgba(200,40,30,.35)}
+.aviso[hidden]{display:none}
+.d-foot{padding:16px;border-top:1px solid var(--line);display:grid;gap:8px}
+.sum[hidden]{display:none}
+.sum{display:flex;justify-content:space-between;color:var(--muted);font-size:.95rem}
+.total{display:flex;justify-content:space-between;font-weight:700;font-size:1.2rem}
+.pay{width:100%;background:var(--red);color:#fff}
+.pay:hover:not(:disabled){background:var(--red-d)}
+.wa{width:100%;background:transparent;color:var(--ink);border-color:#1faa59}
+.pay:disabled,.wa:disabled{opacity:.45;cursor:not-allowed}
+.fine{font-size:.78rem;color:var(--muted);text-align:center}
+.erro{color:var(--red);font-size:.9rem;font-weight:700;text-align:center}
+@media(prefers-color-scheme:dark){.erro{color:#ff8f86}}
+
+dialog{border:0;border-radius:18px;padding:26px;max-width:420px;width:calc(100% - 32px);background:var(--surface);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.4)}
+dialog::backdrop{background:rgba(0,0,0,.55)}
+dialog h2{font-size:1.9rem;margin-bottom:8px}
+dialog p{margin-bottom:14px;color:var(--muted)}
+dialog pre{white-space:pre-wrap;font:inherit;font-size:.9rem;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:14px;max-height:200px;overflow:auto}
+dialog .btn{width:100%;margin-top:8px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="logo" href="#topo" aria-label="Dogão do Adriano, início">🌭 DOGÃO <b>DO ADRIANO</b></a>
+    <nav aria-label="Principal">
+      <a href="#cardapio">Cardápio</a>
+      <a href="#como-pedir">Como pedir</a>
+      <a href="#onde">Onde estamos</a>
+    </nav>
+    <button class="cart-btn" id="openCart" aria-label="Abrir carrinho">🛒 <span class="t">Carrinho</span> <span class="n" id="count">0</span></button>
+  </div>
+</header>
+
+<main id="topo">
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <span class="badge">★ 4,2 no Google · +2.400 avaliações</span>
+        <h1>O melhor hot dog<br>da <span>sua vida!</span></h1>
+        <p>Dogão tradicional, baguete, no prato e prensado na Praça de Santo Antônio, em Osasco. Peça aqui e pague por Pix ou cartão.</p>
+        <div class="cta-row">
+          <a class="btn btn-y" href="#cardapio">Fazer pedido</a>
+          <a class="btn btn-o" href="#onde">Como chegar</a>
+        </div>
+      </div>
+      <svg class="hero-art" viewBox="0 0 320 240" role="img" aria-label="Ilustração de um cachorro-quente">
+        <ellipse cx="160" cy="205" rx="130" ry="16" fill="rgba(0,0,0,.25)"/>
+        <rect x="30" y="120" width="260" height="70" rx="35" fill="#e0a55a"/>
+        <rect x="30" y="100" width="260" height="62" rx="31" fill="#f0bc72"/>
+        <rect x="14" y="96" width="292" height="40" rx="20" fill="#a52318"/>
+        <path d="M30 112c18-14 34 10 52-2s34 10 52-2 34 10 52-2 34 10 52-2 34 8 40 0" stroke="#f5b82e" stroke-width="12" fill="none" stroke-linecap="round"/>
+        <path d="M44 128c20-8 36 8 56 0s36 8 56 0 36 8 56 0 36 8 56 0" stroke="#fff3e0" stroke-width="7" fill="none" stroke-linecap="round" opacity=".9"/>
+        <g fill="#2a1a12"><circle cx="90" cy="150" r="3"/><circle cx="150" cy="158" r="3"/><circle cx="215" cy="150" r="3"/></g>
+        <path d="M250 40l6 14 15 2-11 10 3 15-13-8-13 8 3-15-11-10 15-2z" fill="#f5b82e"/>
+        <g fill="#fff" opacity=".8"><circle cx="60" cy="48" r="4"/><circle cx="96" cy="30" r="3"/><circle cx="40" cy="80" r="3"/></g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="strip"><div class="wrap">
+    <span id="stDelivery"><i class="dot"></i>Delivery: 18:30 à 01:00 (exceto terças)</span>
+    <span id="stRetirada"><i class="dot"></i>Na praça: 18:30 às 05:00, todos os dias</span>
+  </div></div>
+
+  <section id="cardapio"><div class="wrap">
+    <h2 class="sec-h">Cardápio</h2>
+    <p class="sec-sub">Escolha seus itens e finalize pagando online ou combinando pelo WhatsApp.</p>
+    <div class="tabs" role="tablist" id="tabs" aria-label="Categorias"></div>
+    <div class="grid" id="grid" role="tabpanel" aria-live="polite"></div>
+    <p class="note" id="menuErr" hidden>Não foi possível carregar o cardápio. Recarregue a página.</p>
+    <p class="note">Hot Dog no Prato acompanha refrigerante pequeno de brinde. Bebidas alcoólicas apenas para maiores de 18 anos.</p>
+  </div></section>
+
+  <section class="info" id="como-pedir"><div class="wrap">
+    <h2 class="sec-h">Como pedir</h2>
+    <p class="sec-sub">Três passos, sem cadastro.</p>
+    <div class="cards">
+      <div class="card"><h3>1. Monte o pedido</h3><p>Adicione os itens ao carrinho e ajuste as quantidades.</p></div>
+      <div class="card"><h3>2. Informe os dados</h3><p>Nome, telefone, delivery ou retirada e, se for entrega, o endereço.</p></div>
+      <div class="card"><h3>3. Pague</h3><p>Pague por Pix ou cartão com segurança pelo Mercado Pago, ou envie o pedido no WhatsApp e pague na entrega ou retirada.</p></div>
+    </div>
+  </div></section>
+
+  <section id="onde"><div class="wrap">
+    <h2 class="sec-h">Onde estamos</h2>
+    <p class="sec-sub">Lanchonete de um lado e, de frente, o carrinho na praça.</p>
+    <div class="cards">
+      <div class="card"><h3>Endereço</h3><p>R. Vicente Celestino, 108<br>Santo Antônio, Osasco – SP, 06126-100</p><p style="margin-top:10px"><a href="https://www.google.com/maps/place/Dog%C3%A3o+do+Adriano/@-23.5533845,-46.7937179,17z" target="_blank" rel="noopener"><b>Abrir no Google Maps →</b></a></p></div>
+      <div class="card"><h3>Horários</h3><p><b>Na praça:</b> 18:30 às 05:00, todos os dias.<br><b>iFood e delivery:</b> 18:30 à 01:00. Não entregamos às terças.</p></div>
+      <div class="card"><h3>Contato</h3><p><a href="https://wa.me/5511990173256" target="_blank" rel="noopener"><b>WhatsApp (11) 99017-3256</b></a></p><p style="margin-top:10px"><span class="stars" aria-hidden="true">★★★★☆</span> 4,2 · 2.418 avaliações no Google</p><p style="margin-top:10px">Pagamento: dinheiro, cartão débito e crédito, Pix, VR e Sodexo (presencial).</p></div>
+    </div>
+  </div></section>
+</main>
+
+<footer><div class="wrap">
+  <p>© Dogão do Adriano · R. Vicente Celestino, 108 – Santo Antônio, Osasco/SP</p>
+</div></footer>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" aria-label="Carrinho" aria-hidden="true">
+  <div class="d-head"><h2>Seu pedido</h2><button class="x" id="closeCart" aria-label="Fechar carrinho">×</button></div>
+  <div class="d-body">
+    <div id="lines"></div>
+    <form id="form" onsubmit="return false" novalidate>
+      <fieldset>
+        <label for="nome">Seu nome<input id="nome" autocomplete="name" placeholder="Como podemos te chamar?"></label>
+        <label for="tel">Telefone (WhatsApp)<input id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000"></label>
+        <div class="seg" role="radiogroup" aria-label="Tipo de pedido">
+          <label><input type="radio" name="tipo" value="Delivery" checked><span>🛵 Delivery</span></label>
+          <label><input type="radio" name="tipo" value="Retirada"><span>🏃 Retirada</span></label>
+        </div>
+        <label id="endWrap" for="end">Endereço de entrega<input id="end" autocomplete="street-address" placeholder="Rua, número, bairro, complemento"></label>
+        <label for="obs">Observações<textarea id="obs" rows="2" maxlength="200" placeholder="Ex.: sem milho, molho à parte…"></textarea></label>
+      </fieldset>
+    </form>
+    <p class="aviso" id="aviso" hidden></p>
+  </div>
+  <div class="d-foot">
+    <div class="sum" id="sumTaxa" hidden><span>Taxa de entrega</span><span id="taxa"></span></div>
+    <div class="total"><span>Total</span><span id="total">R$ 0,00</span></div>
+    <p class="erro" id="erro" role="alert" hidden></p>
+    <button class="btn pay" id="pagar" disabled>Pagar online (Pix ou cartão)</button>
+    <button class="btn wa" id="zap" disabled>Pedir no WhatsApp e pagar na entrega</button>
+    <p class="fine">Pagamento online processado pelo Mercado Pago. Seus dados de cartão não passam por aqui.</p>
+  </div>
+</aside>
+
+<dialog id="resultado" aria-labelledby="resTitulo">
+  <h2 id="resTitulo"></h2>
+  <p id="resTexto"></p>
+  <pre id="resPedido" hidden></pre>
+  <a class="btn pay" id="resZap" target="_blank" rel="noopener" hidden>Enviar detalhes ao Adriano no WhatsApp</a>
+  <button class="btn btn-y" id="resFechar">Fechar</button>
+</dialog>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const brl = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  del(k) { try { localStorage.removeItem(k); } catch {} },
+};
+
+let MENU = null, porId = new Map(), tab = null;
+let horario = null; // resposta de /api/status
+const cart = new Map(); // chave "id|pao" -> {id, pao, q}
+
+/* ---------- cardápio ---------- */
+async function carregarMenu() {
+  try {
+    const r = await fetch("menu.json", { cache: "no-cache" });
+    if (!r.ok) throw new Error(r.status);
+    MENU = await r.json();
+    MENU.itens.forEach((i) => porId.set(i.id, i));
+    tab = MENU.categorias[0].id;
+    renderTabs(); renderGrid(); restaurarCarrinho(); renderCart();
+  } catch (e) {
+    $("menuErr").hidden = false;
+  }
+}
+function renderTabs() {
+  $("tabs").innerHTML = MENU.categorias.map((c) =>
+    `<button class="tab" role="tab" aria-selected="${c.id === tab}" data-c="${c.id}">${esc(c.nome)}</button>`).join("");
+  $("tabs").querySelectorAll(".tab").forEach((b) => b.onclick = () => { tab = b.dataset.c; renderTabs(); renderGrid(); });
+}
+function renderGrid() {
+  $("grid").innerHTML = MENU.itens.filter((m) => m.cat === tab).map((m) => {
+    const opts = m.paes ? `<select data-pao="${m.id}" aria-label="Tipo de pão para ${esc(m.nome)}">${m.paes.map((p) => `<option>${esc(p)}</option>`).join("")}</select>` : "";
+    const acao = m.encomenda
+      ? `<button class="add alt" data-enc="${m.id}">Encomendar</button>`
+      : `${opts}<button class="add" data-add="${m.id}" aria-label="Adicionar ${esc(m.nome)} ao carrinho">+ Adicionar</button>`;
+    return `<article class="item">
+      ${m.encomenda ? `<span class="tag">${esc(m.encomenda)}</span>` : ""}
+      <h3>${esc(m.nome)}</h3>${m.desc ? `<p>${esc(m.desc)}</p>` : ""}
+      ${m.paes ? `<p>Pão de banha ou sal, você escolhe.</p>` : ""}
+      <div class="row"><span class="price">${brl(m.preco)}</span><div class="acts">${acao}</div></div>
+    </article>`;
+  }).join("");
+  $("grid").querySelectorAll("[data-add]").forEach((b) => b.onclick = () => {
+    const id = b.dataset.add, sel = $("grid").querySelector(`[data-pao="${id}"]`);
+    mudar(id, sel ? sel.value : "", 1);
+    b.textContent = "✓ Adicionado"; setTimeout(() => b.textContent = "+ Adicionar", 900);
+  });
+  $("grid").querySelectorAll("[data-enc]").forEach((b) => b.onclick = () => {
+    const m = porId.get(b.dataset.enc);
+    const msg = `Olá, Dogão do Adriano! Quero encomendar: ${m.nome} (${brl(m.preco)}). Qual a data e a antecedência necessária?`;
+    window.open(`https://wa.me/${MENU.whatsapp}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
+  });
+}
+
+/* ---------- carrinho ---------- */
+const chave = (id, pao) => `${id}|${pao || ""}`;
+function mudar(id, pao, d) {
+  const k = chave(id, pao), atual = cart.get(k) || { id, pao, q: 0 };
+  atual.q += d;
+  if (atual.q <= 0) cart.delete(k); else cart.set(k, atual);
+  salvarCarrinho(); renderCart();
+}
+const salvarCarrinho = () => store.set("dogao_cart", [...cart.values()]);
+function restaurarCarrinho() {
+  (store.get("dogao_cart") || []).forEach((l) => { if (porId.has(l.id) && l.q > 0) cart.set(chave(l.id, l.pao), l); });
+}
+const tipo = () => document.querySelector('input[name="tipo"]:checked').value;
+function totais() {
+  let n = 0, sub = 0;
+  cart.forEach((l) => { n += l.q; sub += l.q * porId.get(l.id).preco; });
+  const taxa = tipo() === "Delivery" && n > 0 ? (MENU.taxaEntrega || 0) : 0;
+  return { n, sub, taxa, total: sub + taxa };
+}
+function renderCart() {
+  if (!MENU) return;
+  const { n, taxa, total } = totais();
+  $("count").textContent = n;
+  $("total").textContent = brl(total);
+  $("sumTaxa").hidden = !(taxa > 0); $("taxa").textContent = brl(taxa);
+  $("lines").innerHTML = n === 0
+    ? `<p class="empty">Seu carrinho está vazio.<br>Escolha algo no cardápio 🌭</p>`
+    : [...cart].map(([k, l]) => { const m = porId.get(l.id);
+        return `<div class="line"><div><b>${esc(m.nome)}</b><small>${l.pao ? `Pão de ${esc(l.pao.toLowerCase())} · ` : ""}${brl(m.preco)} cada</small>
+        <div class="qty"><button data-k="${esc(k)}" data-d="-1" aria-label="Diminuir quantidade">−</button><span aria-live="polite">${l.q}</span><button data-k="${esc(k)}" data-d="1" aria-label="Aumentar quantidade">+</button></div></div>
+        <b>${brl(l.q * m.preco)}</b></div>`; }).join("");
+  $("lines").querySelectorAll(".qty button").forEach((b) => b.onclick = () => { const l = cart.get(b.dataset.k); mudar(l.id, l.pao, +b.dataset.d); });
+  $("endWrap").style.display = tipo() === "Delivery" ? "grid" : "none";
+  atualizarBotoes();
+}
+function atualizarBotoes() {
+  const { n } = totais();
+  const st = horario && horario[tipo()];
+  const fechado = st && !st.aberto;
+  $("aviso").hidden = !fechado; if (fechado) $("aviso").textContent = "Fechado agora. " + st.msg;
+  const online = !horario || horario.pagamentoOnline !== false;
+  $("pagar").disabled = n === 0 || fechado || !online;
+  $("pagar").title = online ? "" : "Pagamento online indisponível no momento";
+  $("zap").disabled = n === 0;
+}
+
+/* ---------- gaveta ---------- */
+function gaveta(abrir) {
+  $("drawer").classList.toggle("on", abrir); $("overlay").classList.toggle("on", abrir);
+  $("drawer").setAttribute("aria-hidden", !abrir);
+  if (abrir) { carregarHorario(); $("closeCart").focus(); } else $("openCart").focus();
+}
+$("openCart").onclick = () => gaveta(true);
+$("closeCart").onclick = () => gaveta(false);
+$("overlay").onclick = () => gaveta(false);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") gaveta(false); });
+document.querySelectorAll('input[name="tipo"]').forEach((r) => r.onchange = renderCart);
+
+/* ---------- horário ---------- */
+async function carregarHorario() {
+  try {
+    const r = await fetch("/api/status", { cache: "no-store" });
+    if (!r.ok) throw 0;
+    horario = await r.json();
+    for (const [id, t] of [["stDelivery", "Delivery"], ["stRetirada", "Retirada"]]) {
+      const el = $(id), on = horario[t].aberto;
+      el.querySelector(".dot").className = "dot " + (on ? "on" : "off");
+      el.dataset.s = on ? "Aberto agora" : "Fechado agora";
+      el.firstChild.nextSibling.textContent = (on ? "Aberto agora · " : "Fechado agora · ") + (t === "Delivery" ? "Delivery até 01:00" : "Na praça até 05:00");
+    }
+  } catch { horario = null; }
+  renderCart();
+}
+
+/* ---------- envio do pedido ---------- */
+function lerDados(exigirEndereco = true) {
+  const d = { nome: $("nome").value.trim(), telefone: $("tel").value.replace(/\D/g, ""), tipo: tipo(), endereco: $("end").value.trim(), obs: $("obs").value.trim() };
+  const falha = (campo, msg) => { $(campo).focus(); mostrarErro(msg); return null; };
+  if (d.nome.length < 2) return falha("nome", "Informe seu nome.");
+  if (d.telefone.length < 10) return falha("tel", "Informe um telefone com DDD.");
+  if (d.tipo === "Delivery" && d.endereco.length < 6) return falha("end", "Informe o endereço de entrega.");
+  mostrarErro(""); return d;
+}
+document.getElementById("form").addEventListener("input", () => mostrarErro(""));
+function mostrarErro(m) { $("erro").hidden = !m; $("erro").textContent = m; }
+
+function textoPedido(d, ref) {
+  const { total } = totais();
+  let t = ref ? `Pedido ${ref} (pago online)\n` : `Olá, Dogão do Adriano! Quero fazer um pedido:\n\n`;
+  cart.forEach((l) => { const m = porId.get(l.id); t += `• ${l.q}x ${m.nome}${l.pao ? ` (pão de ${l.pao.toLowerCase()})` : ""} — ${brl(l.q * m.preco)}\n`; });
+  t += `\nTotal: ${brl(total)}${ref ? "" : " (pagamento na entrega/retirada)"}\nTipo: ${d.tipo}\nNome: ${d.nome}\nTelefone: ${d.telefone}`;
+  if (d.tipo === "Delivery") t += `\nEndereço: ${d.endereco}`;
+  if (d.obs) t += `\nObs.: ${d.obs}`;
+  return t;
+}
+$("zap").onclick = () => {
+  const d = lerDados(); if (!d) return;
+  window.open(`https://wa.me/${MENU.whatsapp}?text=${encodeURIComponent(textoPedido(d))}`, "_blank", "noopener");
+};
+$("pagar").onclick = async () => {
+  const d = lerDados(); if (!d) return;
+  const btn = $("pagar"); btn.disabled = true; btn.textContent = "Abrindo pagamento…";
+  try {
+    const r = await fetch("/api/checkout", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...d, itens: [...cart.values()].map((l) => ({ id: l.id, pao: l.pao, q: l.q })) }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.url) throw new Error(j.erro || "Não foi possível iniciar o pagamento.");
+    store.set("dogao_pedido", { ref: j.ref, texto: textoPedido(d, j.ref) });
+    location.href = j.url;
+  } catch (e) {
+    mostrarErro(e.message); btn.textContent = "Pagar online (Pix ou cartão)"; atualizarBotoes();
+  }
+};
+
+/* ---------- retorno do Mercado Pago ---------- */
+function tratarRetorno() {
+  const q = new URLSearchParams(location.search), st = q.get("pagamento");
+  if (!st) return;
+  history.replaceState(null, "", location.pathname);
+  const ped = store.get("dogao_pedido");
+  const dlg = $("resultado"), zap = $("resZap"), pre = $("resPedido");
+  const wa = (t) => `https://wa.me/5511990173256?text=${encodeURIComponent(t)}`;
+  zap.hidden = true; pre.hidden = true;
+  if (st === "ok") {
+    $("resTitulo").textContent = "Pagamento aprovado! 🎉";
+    $("resTexto").textContent = "Recebemos seu pedido" + (q.get("ref") ? ` (${q.get("ref")})` : "") + ". Para agilizar, envie os detalhes no WhatsApp.";
+    if (ped) { pre.textContent = ped.texto; pre.hidden = false; zap.href = wa(ped.texto); zap.hidden = false; }
+    cart.clear(); salvarCarrinho(); store.del("dogao_pedido");
+  } else if (st === "pendente") {
+    $("resTitulo").textContent = "Pagamento pendente";
+    $("resTexto").textContent = "Assim que o Mercado Pago confirmar o pagamento (Pix pode levar alguns instantes), avisamos o Adriano. Se quiser, mande os detalhes no WhatsApp.";
+    if (ped) { pre.textContent = ped.texto; pre.hidden = false; zap.href = wa(ped.texto); zap.hidden = false; }
+    cart.clear(); salvarCarrinho();
+  } else {
+    $("resTitulo").textContent = "Pagamento não concluído";
+    $("resTexto").textContent = "Nada foi cobrado. Seu carrinho continua salvo, é só tentar de novo.";
+  }
+  dlg.showModal();
+}
+$("resFechar").onclick = () => $("resultado").close();
+
+carregarMenu().then(() => { carregarHorario(); tratarRetorno(); });
+</script>
+</body>
+</html>
