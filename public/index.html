@@ -20,6 +20,7 @@
   :root{--bg:#1c120d;--surface:#2a1b14;--ink:#fff3e0;--muted:#cbb7a4;--line:#443024;--shadow:0 8px 24px rgba(0,0,0,.4);--ok:#4cc97f}
 }
 *{box-sizing:border-box;margin:0}
+[hidden]{display:none!important}
 html{scroll-behavior:smooth;scroll-padding-top:70px}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.5;-webkit-font-smoothing:antialiased}
 a{color:inherit}
@@ -129,6 +130,21 @@ dialog h2{font-size:1.9rem;margin-bottom:8px}
 dialog p{margin-bottom:14px;color:var(--muted)}
 dialog pre{white-space:pre-wrap;font:inherit;font-size:.9rem;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:14px;max-height:200px;overflow:auto}
 dialog .btn{width:100%;margin-top:8px}
+.acc-btn{background:transparent;color:#fff;border:2px solid rgba(255,255,255,.7);border-radius:999px;padding:8px 14px;font:700 .9rem var(--body);cursor:pointer;min-height:44px;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.acc-btn:hover{background:rgba(255,255,255,.14)}
+.hdr-r{display:flex;gap:8px;align-items:center}
+.abas{display:flex;gap:6px;margin-bottom:12px}
+.abas button{flex:1;border:2px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:9px;font:700 .95rem var(--body);cursor:pointer;min-height:44px}
+.abas button[aria-selected="true"]{background:var(--red);border-color:var(--red);color:#fff}
+dialog form{display:grid;gap:10px}
+.link{background:none;border:0;color:var(--red);font:700 .88rem var(--body);cursor:pointer;text-decoration:underline;padding:4px 0}
+@media(prefers-color-scheme:dark){.link{color:var(--mustard)}}
+.ped{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:.88rem;background:var(--bg)}
+.ped b{font-size:.95rem}.ped small{color:var(--muted);display:block}
+.ped .mini{margin-top:6px;background:var(--red);color:#fff;border:0;border-radius:8px;padding:7px 12px;font:700 .82rem var(--body);cursor:pointer;min-height:36px}
+.msg{font-size:.88rem;font-weight:700;color:var(--red);min-height:1.2em}
+.msg.ok{color:var(--ok)}
+dialog.larga{max-width:520px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -142,7 +158,7 @@ dialog .btn{width:100%;margin-top:8px}
       <a href="#como-pedir">Como pedir</a>
       <a href="#onde">Onde estamos</a>
     </nav>
-    <button class="cart-btn" id="openCart" aria-label="Abrir carrinho">🛒 <span class="t">Carrinho</span> <span class="n" id="count">0</span></button>
+    <div class="hdr-r"><button class="acc-btn" id="openConta" hidden>Entrar</button><button class="cart-btn" id="openCart" aria-label="Abrir carrinho">🛒 <span class="t">Carrinho</span> <span class="n" id="count">0</span></button></div>
   </div>
 </header>
 
@@ -240,6 +256,46 @@ dialog .btn{width:100%;margin-top:8px}
   </div>
 </aside>
 
+<dialog id="dlgLogin" aria-labelledby="loginTit">
+  <h2 id="loginTit">Entrar</h2>
+  <div class="abas" role="tablist"><button type="button" role="tab" id="abaEntrar" aria-selected="true">Entrar</button><button type="button" role="tab" id="abaCriar" aria-selected="false">Criar conta</button></div>
+  <form id="formLogin" novalidate>
+    <label id="lbNome" for="lgNome" hidden>Seu nome<input id="lgNome" autocomplete="name"></label>
+    <label for="lgEmail">E-mail<input id="lgEmail" type="email" autocomplete="email" inputmode="email"></label>
+    <label for="lgSenha">Senha<input id="lgSenha" type="password" autocomplete="current-password" placeholder="Mínimo 8 caracteres"></label>
+    <p class="msg" id="lgMsg" role="alert"></p>
+    <button class="btn pay" id="lgOk" type="submit">Entrar</button>
+    <button class="link" id="lgEsqueci" type="button">Esqueci a senha</button>
+  </form>
+  <button class="btn btn-y" type="button" data-fechar="dlgLogin">Cancelar</button>
+</dialog>
+
+<dialog id="dlgSenha" aria-labelledby="senhaTit">
+  <h2 id="senhaTit">Nova senha</h2>
+  <form id="formSenha" novalidate>
+    <label for="nsSenha">Escolha uma nova senha<input id="nsSenha" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres"></label>
+    <p class="msg" id="nsMsg" role="alert"></p>
+    <button class="btn pay" type="submit">Salvar senha</button>
+  </form>
+</dialog>
+
+<dialog id="dlgConta" class="larga" aria-labelledby="contaTit">
+  <h2 id="contaTit">Minha conta</h2>
+  <p id="contaEmail"></p>
+  <a class="btn btn-y" id="linkAdmin" href="/admin/" hidden>Abrir painel do administrador</a>
+  <form id="formConta" novalidate>
+    <label for="cNome">Nome<input id="cNome" autocomplete="name"></label>
+    <label for="cTel">Telefone (WhatsApp)<input id="cTel" type="tel" autocomplete="tel"></label>
+    <label for="cEnd">Endereço padrão de entrega<input id="cEnd" autocomplete="street-address"></label>
+    <p class="msg" id="cMsg" role="status"></p>
+    <button class="btn pay" type="submit">Salvar dados</button>
+  </form>
+  <h3 style="font-size:1.4rem;margin:18px 0 8px">Últimos pedidos</h3>
+  <div id="cPedidos"></div>
+  <button class="btn btn-y" type="button" id="btnSair">Sair da conta</button>
+  <button class="link" type="button" data-fechar="dlgConta" style="width:100%;text-align:center">Fechar</button>
+</dialog>
+
 <dialog id="resultado" aria-labelledby="resTitulo">
   <h2 id="resTitulo"></h2>
   <p id="resTexto"></p>
@@ -248,6 +304,7 @@ dialog .btn{width:100%;margin-top:8px}
   <button class="btn btn-y" id="resFechar">Fechar</button>
 </dialog>
 
+<script src="/auth.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const brl = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -265,7 +322,7 @@ const cart = new Map(); // chave "id|pao" -> {id, pao, q}
 /* ---------- cardápio ---------- */
 async function carregarMenu() {
   try {
-    const r = await fetch("menu.json", { cache: "no-cache" });
+    const r = await fetch("/api/menu", { cache: "no-store" });
     if (!r.ok) throw new Error(r.status);
     MENU = await r.json();
     MENU.itens.forEach((i) => porId.set(i.id, i));
@@ -400,15 +457,26 @@ function textoPedido(d, ref) {
   if (d.obs) t += `\nObs.: ${d.obs}`;
   return t;
 }
-$("zap").onclick = () => {
+$("zap").onclick = async () => {
   const d = lerDados(); if (!d) return;
-  window.open(`https://wa.me/${MENU.whatsapp}?text=${encodeURIComponent(textoPedido(d))}`, "_blank", "noopener");
+  const w = window.open("about:blank", "_blank"); // abre já, para o navegador não bloquear
+  let ref = "";
+  try {
+    const r = await auth.fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...d, modo: "whatsapp", itens: [...cart.values()].map((l) => ({ id: l.id, pao: l.pao, q: l.q })) }) });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && j.ref) ref = j.ref; else if (r.status === 400) { if (w) w.close(); return mostrarErro(j.erro || "Confira o pedido."); }
+  } catch { /* se o registro falhar, o pedido ainda segue pelo WhatsApp */ }
+  const texto = textoPedido(d) + (ref ? `\nPedido nº ${ref}` : "");
+  const url = `https://wa.me/${MENU.whatsapp}?text=${encodeURIComponent(texto)}`;
+  if (w) w.location.href = url; else location.href = url;
+  if (ref) { cart.clear(); salvarCarrinho(); renderCart(); gaveta(false); }
 };
 $("pagar").onclick = async () => {
   const d = lerDados(); if (!d) return;
   const btn = $("pagar"); btn.disabled = true; btn.textContent = "Abrindo pagamento…";
   try {
-    const r = await fetch("/api/checkout", {
+    const r = await auth.fetch("/api/checkout", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...d, itens: [...cart.values()].map((l) => ({ id: l.id, pao: l.pao, q: l.q })) }),
     });
@@ -448,7 +516,101 @@ function tratarRetorno() {
 }
 $("resFechar").onclick = () => $("resultado").close();
 
+/* ---------- conta do cliente ---------- */
+const STATUS_PT = { aguardando_pagamento: "Aguardando pagamento", a_combinar: "Enviado por WhatsApp", recusado: "Pagamento recusado", pago: "Pago", em_preparo: "Em preparo", pronto: "Pronto", entregue: "Entregue", cancelado: "Cancelado" };
+let perfil = null, loginModo = "entrar";
+const fechar = (id) => $(id).close();
+document.querySelectorAll("[data-fechar]").forEach((b) => b.onclick = () => fechar(b.dataset.fechar));
+
+async function atualizarConta() {
+  const cfg = await auth.config();
+  $("openConta").hidden = !cfg;
+  if (!cfg) return;
+  if (!auth.logado()) { perfil = null; $("openConta").textContent = "Entrar"; return; }
+  try {
+    const r = await auth.fetch("/api/conta");
+    if (!r.ok) throw new Error();
+    const j = await r.json(); perfil = j; 
+    $("openConta").textContent = "👤 " + ((j.perfil.nome || "Conta").split(" ")[0]);
+    if (!$("nome").value) $("nome").value = j.perfil.nome || "";
+    if (!$("tel").value) $("tel").value = j.perfil.telefone || "";
+    if (!$("end").value) $("end").value = j.perfil.endereco || "";
+  } catch { perfil = null; $("openConta").textContent = "Entrar"; }
+}
+function modoLogin(m) {
+  loginModo = m;
+  $("abaEntrar").setAttribute("aria-selected", m === "entrar"); $("abaCriar").setAttribute("aria-selected", m === "criar");
+  $("lbNome").hidden = m !== "criar"; $("loginTit").textContent = m === "criar" ? "Criar conta" : "Entrar";
+  $("lgOk").textContent = m === "criar" ? "Criar conta" : "Entrar";
+  $("lgSenha").autocomplete = m === "criar" ? "new-password" : "current-password";
+  $("lgEsqueci").hidden = m === "criar"; $("lgMsg").textContent = ""; $("lgMsg").className = "msg";
+}
+$("abaEntrar").onclick = () => modoLogin("entrar");
+$("abaCriar").onclick = () => modoLogin("criar");
+const msgLogin = (t, ok) => { $("lgMsg").textContent = t; $("lgMsg").className = "msg" + (ok ? " ok" : ""); };
+
+$("formLogin").onsubmit = async (e) => {
+  e.preventDefault();
+  const email = $("lgEmail").value.trim(), senha = $("lgSenha").value, nome = $("lgNome").value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return msgLogin("Informe um e-mail válido.");
+  if (senha.length < 8) return msgLogin("A senha precisa ter pelo menos 8 caracteres.");
+  if (loginModo === "criar" && nome.length < 2) return msgLogin("Informe seu nome.");
+  $("lgOk").disabled = true; msgLogin("");
+  try {
+    if (loginModo === "criar") {
+      const r = await auth.cadastrar(nome, email, senha);
+      if (!r.logado) { msgLogin("Enviamos um e-mail de confirmação. Confirme e depois entre.", true); $("lgOk").disabled = false; return; }
+    } else await auth.entrar(email, senha);
+    $("lgSenha").value = ""; $("dlgLogin").close(); await atualizarConta();
+  } catch (err) { msgLogin(err.message); }
+  $("lgOk").disabled = false;
+};
+$("lgEsqueci").onclick = async () => {
+  const email = $("lgEmail").value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return msgLogin("Digite seu e-mail acima e toque de novo.");
+  try { await auth.recuperar(email); msgLogin("Se o e-mail existir, enviamos o link para criar uma nova senha.", true); } catch (err) { msgLogin(err.message); }
+};
+$("formSenha").onsubmit = async (e) => {
+  e.preventDefault();
+  if ($("nsSenha").value.length < 8) { $("nsMsg").textContent = "Mínimo de 8 caracteres."; return; }
+  try { await auth.novaSenha($("nsSenha").value); $("nsSenha").value = ""; $("dlgSenha").close(); await atualizarConta(); } catch (err) { $("nsMsg").textContent = err.message; }
+};
+
+function resumoItens(itens) { return itens.map((i) => `${i.q}x ${esc(i.nome)}${i.pao ? ` (${esc(i.pao.toLowerCase())})` : ""}`).join(", "); }
+function renderPedidos(lista) {
+  $("cPedidos").innerHTML = !lista.length ? '<p class="empty" style="padding:14px">Você ainda não fez pedidos logado.</p>' : lista.map((p, n) => `
+    <div class="ped"><b>${new Date(p.criado_em).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} · ${brl(Number(p.total))}</b>
+    <small>${esc(STATUS_PT[p.status] || p.status)} · ${esc(p.tipo)} · ${esc(p.ref)}</small>
+    <div>${resumoItens(p.itens)}</div><button class="mini" data-repetir="${n}">Pedir de novo</button></div>`).join("");
+  $("cPedidos").querySelectorAll("[data-repetir]").forEach((b) => b.onclick = () => {
+    let add = 0;
+    lista[+b.dataset.repetir].itens.forEach((i) => { const m = porId.get(i.id); if (m && !m.encomenda) { mudar(i.id, i.pao && m.paes && m.paes.includes(i.pao) ? i.pao : (m.paes ? m.paes[0] : ""), i.q); add++; } });
+    $("dlgConta").close(); if (add) gaveta(true);
+  });
+}
+$("openConta").onclick = async () => {
+  if (!auth.logado()) { modoLogin("entrar"); $("dlgLogin").showModal(); return; }
+  await atualizarConta();
+  if (!perfil) { modoLogin("entrar"); $("dlgLogin").showModal(); return; }
+  $("contaEmail").textContent = perfil.perfil.email;
+  $("linkAdmin").hidden = !perfil.perfil.admin;
+  $("cNome").value = perfil.perfil.nome; $("cTel").value = perfil.perfil.telefone; $("cEnd").value = perfil.perfil.endereco;
+  $("cMsg").textContent = ""; renderPedidos(perfil.pedidos);
+  $("dlgConta").showModal();
+};
+$("formConta").onsubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const r = await auth.fetch("/api/conta", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nome: $("cNome").value, telefone: $("cTel").value, endereco: $("cEnd").value }) });
+    if (!r.ok) throw new Error();
+    $("cMsg").className = "msg ok"; $("cMsg").textContent = "Dados salvos."; await atualizarConta();
+  } catch { $("cMsg").className = "msg"; $("cMsg").textContent = "Não foi possível salvar."; }
+};
+$("btnSair").onclick = () => { auth.sair(); $("dlgConta").close(); perfil = null; $("openConta").textContent = "Entrar"; };
+
+const tipoHash = auth.lerHash();
 carregarMenu().then(() => { carregarHorario(); tratarRetorno(); });
+atualizarConta().then(() => { if (tipoHash === "recovery") $("dlgSenha").showModal(); });
 </script>
 </body>
 </html>

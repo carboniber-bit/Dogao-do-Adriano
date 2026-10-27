@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel Dogão do Adriano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f6f3ee; --surface:#ffffff; --ink:#1f1a17; --ink2:#5b5148; --muted:#857a70; --line:#e4dccf;
+  --brand:#c8281e; --brand-d:#a31d15; --mustard:#f5b82e;
+  --s1:#2a78d6; --s1-soft:#d8e6f8;
+  --good:#1c7a45; --bad:#b4281f; --warn:#8a5a00;
+  --shadow:0 1px 2px rgba(31,26,23,.06),0 6px 18px rgba(31,26,23,.06);
+  --display:"Anton","Impact",sans-serif; --body:"DM Sans",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#15100d; --surface:#211915; --ink:#f4ece2; --ink2:#c9bcae; --muted:#9c8f82; --line:#3a2e27;
+    --s1:#3987e5; --s1-soft:#1d3552; --good:#4cc97f; --bad:#ff8f86; --warn:#e6b450; --shadow:none;
+  }
+}
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);line-height:1.45;-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--mustard);outline-offset:2px}
+[hidden]{display:none!important}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+
+/* login */
+.gate{min-height:100vh;display:grid;place-items:center;padding:20px}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px;width:min(100%,400px);box-shadow:var(--shadow)}
+.box h1{font-family:var(--display);font-weight:400;font-size:2rem;letter-spacing:.02em;margin-bottom:4px}
+.box p{color:var(--ink2);margin-bottom:16px}
+label{display:grid;gap:4px;font-weight:700;font-size:.88rem;margin-bottom:12px}
+input,select{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%;min-height:44px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;background:var(--brand);color:#fff;border:0;border-radius:10px;padding:10px 16px;font-weight:700;cursor:pointer;min-height:44px;text-decoration:none}
+.btn:hover:not(:disabled){background:var(--brand-d)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover:not(:disabled){background:var(--bg)}
+.btn.sm{min-height:36px;padding:6px 12px;font-size:.88rem}
+.btn.full{width:100%}
+.erro{color:var(--bad);font-weight:700;font-size:.9rem;min-height:1.3em;margin:4px 0 10px}
+
+/* topo */
+header{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:10}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;flex-wrap:wrap}
+.brand{font-family:var(--display);font-size:1.4rem;letter-spacing:.03em}
+.brand b{color:var(--brand);font-weight:400}
+.top-r{display:flex;gap:8px;align-items:center;font-size:.88rem;color:var(--ink2)}
+nav{display:flex;gap:4px;overflow-x:auto;padding-bottom:8px}
+nav button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font-weight:700;color:var(--ink2);cursor:pointer;white-space:nowrap;min-height:44px}
+nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--brand)}
+.badge{background:var(--brand);color:#fff;border-radius:999px;font-size:.72rem;padding:1px 7px;margin-left:6px}
+
+main{padding:22px 0 60px}
+h2{font-size:1.3rem;margin-bottom:12px}
+.bar-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{background:none;border:0;padding:9px 14px;font-weight:700;color:var(--ink2);cursor:pointer;min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;font-weight:700;font-size:.88rem;cursor:pointer;min-height:40px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* tiles */
+.tiles{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:16px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;box-shadow:var(--shadow)}
+.tile .k{color:var(--ink2);font-size:.85rem;font-weight:700}
+.tile .v{font-size:clamp(1.8rem,5vw,2.4rem);font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:4px 0}
+.tile .d{font-size:.82rem;color:var(--ink2)}
+.up{color:var(--good);font-weight:700}.down{color:var(--bad);font-weight:700}
+
+/* cartões de gráfico */
+.cards{display:grid;gap:14px;grid-template-columns:1fr}
+@media(min-width:900px){.cards.two{grid-template-columns:1fr 1fr}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:var(--shadow);min-width:0}
+.card-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:12px}
+.card-h h2{margin:0}
+.card-h button{background:none;border:0;color:var(--ink2);text-decoration:underline;cursor:pointer;font-size:.82rem;min-height:32px}
+.empty{color:var(--muted);padding:30px 8px;text-align:center}
+
+.rank{display:grid;gap:8px}
+.rk{display:grid;grid-template-columns:minmax(90px,38%) 1fr auto;gap:10px;align-items:center;font-size:.88rem;padding:2px 0;border-radius:8px;cursor:default}
+.rk .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+.rk .trk{background:var(--s1-soft);border-radius:4px;height:16px}
+.rk .fill{background:var(--s1);height:100%;border-radius:0 4px 4px 0;min-width:2px}
+.rk .vl{font-variant-numeric:tabular-nums;color:var(--ink2);min-width:5.5ch;text-align:right}
+.rk:hover,.rk:focus-visible{background:var(--bg)}
+
+.cols{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;align-items:end;height:190px;border-bottom:1px solid var(--line);padding-top:8px}
+.cols.g4{gap:5px}
+.col{height:100%;display:flex;align-items:flex-end;position:relative;cursor:default;border-radius:4px}
+.col i{display:block;width:100%;background:var(--s1);border-radius:4px 4px 0 0;min-height:2px}
+.col:hover,.col:focus-visible{background:var(--s1-soft)}
+.lbls{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;font-size:.7rem;color:var(--muted);margin-top:4px;text-align:center}
+.lbls span{white-space:nowrap;overflow:visible}
+.tip{position:fixed;z-index:50;pointer-events:none;background:var(--ink);color:var(--bg);padding:7px 10px;border-radius:8px;font-size:.82rem;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:240px}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink2);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.tbl{overflow-x:auto}
+
+/* pedidos */
+.ped{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.ped.novo{border-left:5px solid var(--brand)}
+.ped-h{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:baseline}
+.ped-h b{font-size:1rem}
+.st{display:inline-block;border-radius:999px;padding:2px 10px;font-size:.76rem;font-weight:700;border:1px solid var(--line);background:var(--bg)}
+.st.pago,.st.a_combinar{background:#fde7e4;border-color:#f3b8b1;color:#8f160f}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .st.pago,:root:not([data-theme="light"]) .st.a_combinar{background:#4a1d19;border-color:#7a2f29;color:#ffb4ac}}
+.ped ul{margin:8px 0 6px 18px;font-size:.92rem}
+.meta{font-size:.86rem;color:var(--ink2);display:grid;gap:2px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+a{color:inherit}
+
+/* cardápio */
+.cat-t{font-size:1.05rem;font-weight:700;margin:18px 0 8px;color:var(--ink2)}
+.it{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.it.off{opacity:.6}
+.it .nm{font-weight:700}.it small{color:var(--muted);display:block;font-weight:400}
+.it .ctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.preco{width:110px}
+.chk{display:flex;gap:6px;align-items:center;font-weight:500;margin:0;font-size:.85rem}
+.chk input{width:20px;min-height:20px;height:20px}
+.warn{color:var(--warn);font-size:.76rem;font-weight:700}
+.form-row{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));align-items:end}
+.form-row label{margin:0}
+.ok{color:var(--good);font-weight:700;font-size:.88rem}
+@media(max-width:560px){.it{grid-template-columns:1fr}.it .ctl{justify-content:flex-start}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="gate" id="gate">
+  <div class="box">
+    <h1>DOGÃO <b style="color:var(--brand);font-weight:400">DO ADRIANO</b></h1>
+    <p>Painel dos administradores. Entre com a sua conta.</p>
+    <form id="fLogin" novalidate>
+      <label for="em">E-mail<input id="em" type="email" autocomplete="email" inputmode="email"></label>
+      <label for="se">Senha<input id="se" type="password" autocomplete="current-password"></label>
+      <p class="erro" id="gErro" role="alert"></p>
+      <button class="btn full" id="gOk" type="submit">Entrar</button>
+    </form>
+    <p style="margin:14px 0 0;font-size:.82rem"><a href="/">← Voltar ao site</a></p>
+  </div>
+</div>
+
+<!-- SEM PERMISSÃO -->
+<div class="gate" id="negado" hidden>
+  <div class="box">
+    <h1>Acesso restrito</h1>
+    <p>A conta <b id="nEmail"></b> não é de administrador. Peça a um administrador para liberar o seu acesso.</p>
+    <button class="btn ghost full" id="nSair">Sair</button>
+    <p style="margin:14px 0 0;font-size:.82rem"><a href="/">← Voltar ao site</a></p>
+  </div>
+</div>
+
+<!-- PAINEL -->
+<div id="app" hidden>
+  <header>
+    <div class="wrap">
+      <div class="top">
+        <div class="brand">DOGÃO <b>DO ADRIANO</b> · painel</div>
+        <div class="top-r"><span id="quem"></span><a class="btn ghost sm" href="/">Ver site</a><button class="btn ghost sm" id="sair">Sair</button></div>
+      </div>
+      <nav role="tablist" id="abas">
+        <button role="tab" data-t="resumo" aria-selected="true">Resumo</button>
+        <button role="tab" data-t="pedidos" aria-selected="false">Pedidos <span class="badge" id="novos" hidden>0</span></button>
+        <button role="tab" data-t="cardapio" aria-selected="false">Cardápio e preços</button>
+        <button role="tab" data-t="equipe" aria-selected="false">Equipe</button>
+        <button role="tab" data-t="historico" aria-selected="false">Histórico</button>
+      </nav>
+    </div>
+  </header>
+  <main class="wrap">
+
+    <section id="t-resumo">
+      <div class="bar-top">
+        <div class="seg" id="periodo" role="group" aria-label="Período">
+          <button data-d="1" aria-pressed="false">Hoje</button><button data-d="7" aria-pressed="true">7 dias</button><button data-d="30" aria-pressed="false">30 dias</button><button data-d="90" aria-pressed="false">90 dias</button>
+        </div>
+        <span style="color:var(--muted);font-size:.82rem">Conta pedidos pagos online e pedidos marcados como pagos. Pedidos de WhatsApp entram quando você os marca como pago, em preparo, pronto ou entregue.</span>
+      </div>
+      <div class="tiles" id="tiles"></div>
+      <div class="cards two">
+        <div class="card"><div class="card-h"><h2>Itens mais pedidos</h2><button data-tabela="rank">Ver como tabela</button></div><div id="gRank"></div></div>
+        <div class="card"><div class="card-h"><h2>Pedidos por horário</h2><button data-tabela="hora">Ver como tabela</button></div><div id="gHora"></div></div>
+      </div>
+      <div class="cards" style="margin-top:14px">
+        <div class="card"><div class="card-h"><h2>Faturamento por dia</h2><button data-tabela="dia">Ver como tabela</button></div><div id="gDia"></div></div>
+      </div>
+    </section>
+
+    <section id="t-pedidos" hidden>
+      <div class="bar-top">
+        <div class="chips" id="filtros"></div>
+        <button class="btn ghost sm" id="recarregar">Atualizar</button>
+      </div>
+      <div id="listaPedidos"></div>
+    </section>
+
+    <section id="t-cardapio" hidden>
+      <div class="card" style="margin-bottom:14px">
+        <h2>Taxa de entrega</h2>
+        <div class="form-row">
+          <label for="taxa">Valor (R$), 0 para não cobrar<input id="taxa" inputmode="decimal"></label>
+          <div><button class="btn" id="salvaTaxa">Salvar taxa</button> <span class="ok" id="taxaMsg"></span></div>
+        </div>
+      </div>
+      <div class="card" style="margin-bottom:6px">
+        <h2>Novo item</h2>
+        <form class="form-row" id="fNovo" novalidate>
+          <label for="nNome">Nome<input id="nNome"></label>
+          <label for="nCat">Categoria<select id="nCat"></select></label>
+          <label for="nPreco">Preço (R$)<input id="nPreco" inputmode="decimal"></label>
+          <label for="nDesc">Descrição<input id="nDesc"></label>
+          <div><button class="btn" type="submit">Adicionar</button></div>
+        </form>
+        <p class="erro" id="nErro" role="alert"></p>
+      </div>
+      <div id="listaItens"></div>
+    </section>
+
+    <section id="t-equipe" hidden>
+      <div class="card" style="margin-bottom:14px">
+        <h2>Administradores</h2>
+        <div id="admins"></div>
+      </div>
+      <div class="card">
+        <h2>Dar ou tirar acesso de administrador</h2>
+        <p style="color:var(--ink2);margin-bottom:10px;font-size:.9rem">A pessoa precisa ter criado uma conta no site primeiro (botão Entrar > Criar conta).</p>
+        <form class="form-row" id="fEquipe" novalidate>
+          <label for="eMail">E-mail da pessoa<input id="eMail" type="email"></label>
+          <label for="eRole">Acesso<select id="eRole"><option value="admin">Administrador</option><option value="cliente">Cliente (remover acesso)</option></select></label>
+          <div><button class="btn" type="submit">Salvar</button></div>
+        </form>
+        <p class="erro" id="eErro" role="alert"></p>
+      </div>
+    </section>
+
+    <section id="t-historico" hidden>
+      <div class="card"><h2>Últimas alterações</h2><div class="tbl" id="hist"></div></div>
+    </section>
+  </main>
+</div>
+<div class="tip" id="tip" hidden></div>
+
+<script src="/auth.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const brl = (n) => Number(n).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const num = (n) => Number(n).toLocaleString("pt-BR");
+const STATUS = { aguardando_pagamento: "Aguardando pagamento", a_combinar: "Novo (WhatsApp)", recusado: "Recusado", pago: "Pago (novo)", em_preparo: "Em preparo", pronto: "Pronto", entregue: "Entregue", cancelado: "Cancelado" };
+const PROXIMO = { pago: ["em_preparo", "Iniciar preparo"], a_combinar: ["em_preparo", "Iniciar preparo"], em_preparo: ["pronto", "Marcar pronto"], pronto: ["entregue", "Marcar entregue"] };
+let periodo = 7, aba = "resumo", filtro = "ativos", resumoAtual = null, tabelaDe = {}, itensAtual = null;
+
+/* ---------- API ---------- */
+async function api(a, { method = "GET", body, qs = "" } = {}) {
+  const r = await auth.fetch(`/api/admin?a=${a}${qs}`, { method, headers: body ? { "Content-Type": "application/json" } : {}, body: body ? JSON.stringify(body) : undefined });
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 401) { mostrar("gate"); throw new Error("Sessão expirada. Entre de novo."); }
+  if (r.status === 403) { $("nEmail").textContent = auth.email(); mostrar("negado"); throw new Error(j.erro); }
+  if (!r.ok) throw new Error(j.erro || "Erro inesperado.");
+  return j;
+}
+function mostrar(qual) { $("gate").hidden = qual !== "gate"; $("negado").hidden = qual !== "negado"; $("app").hidden = qual !== "app"; }
+
+/* ---------- login ---------- */
+$("fLogin").onsubmit = async (e) => {
+  e.preventDefault(); $("gErro").textContent = ""; $("gOk").disabled = true;
+  try { await auth.entrar($("em").value.trim(), $("se").value); $("se").value = ""; await iniciar(); }
+  catch (err) { $("gErro").textContent = err.message; }
+  $("gOk").disabled = false;
+};
+const sair = () => { auth.sair(); mostrar("gate"); };
+$("sair").onclick = sair; $("nSair").onclick = sair;
+
+/* ---------- abas ---------- */
+function irPara(t) {
+  aba = t;
+  document.querySelectorAll("#abas button").forEach((b) => b.setAttribute("aria-selected", b.dataset.t === t));
+  ["resumo", "pedidos", "cardapio", "equipe", "historico"].forEach((x) => $("t-" + x).hidden = x !== t);
+  history.replaceState(null, "", "#" + t);
+  carregarAba();
+}
+document.querySelectorAll("#abas button").forEach((b) => b.onclick = () => irPara(b.dataset.t));
+async function carregarAba() {
+  try {
+    if (aba === "resumo") await carregarResumo();
+    if (aba === "pedidos") await carregarPedidos();
+    if (aba === "cardapio") await carregarItens();
+    if (aba === "equipe") await carregarEquipe();
+    if (aba === "historico") await carregarHistorico();
+  } catch (e) { /* api() já tratou login/permissão */ }
+}
+
+/* ---------- tooltip ---------- */
+const tip = $("tip");
+function ligaTip(el, texto) {
+  el.tabIndex = 0; el.setAttribute("aria-label", texto);
+  const mostra = (x, y) => { tip.textContent = texto; tip.hidden = false; const w = tip.offsetWidth; tip.style.left = Math.max(8, Math.min(innerWidth - w - 8, x - w / 2)) + "px"; tip.style.top = Math.max(8, y - tip.offsetHeight - 10) + "px"; };
+  el.addEventListener("mousemove", (e) => mostra(e.clientX, e.clientY));
+  el.addEventListener("mouseleave", () => tip.hidden = true);
+  el.addEventListener("focus", () => { const r = el.getBoundingClientRect(); mostra(r.left + r.width / 2, r.top); });
+  el.addEventListener("blur", () => tip.hidden = true);
+}
+
+/* ---------- resumo ---------- */
+document.querySelectorAll("#periodo button").forEach((b) => b.onclick = () => {
+  periodo = +b.dataset.d; document.querySelectorAll("#periodo button").forEach((x) => x.setAttribute("aria-pressed", x === b)); carregarResumo();
+});
+function delta(atual, antes, fmt) {
+  if (!antes) return `<span class="d">${atual ? "Sem período anterior para comparar" : ""}</span>`;
+  const p = Math.round((atual - antes) / antes * 100);
+  return `<span class="d"><span class="${p >= 0 ? "up" : "down"}">${p >= 0 ? "▲" : "▼"} ${Math.abs(p)}%</span> vs. período anterior (${fmt(antes)})</span>`;
+}
+async function carregarResumo() {
+  const j = await api("resumo", { qs: `&dias=${periodo}` });
+  resumoAtual = j; const k = j.kpis;
+  $("tiles").innerHTML = `
+    <div class="tile"><div class="k">Faturamento</div><div class="v">${brl(k.receita)}</div>${delta(k.receita, k.receitaAnterior, brl)}</div>
+    <div class="tile"><div class="k">Pedidos</div><div class="v">${num(k.pedidos)}</div>${delta(k.pedidos, k.pedidosAnterior, num)}</div>
+    <div class="tile"><div class="k">Ticket médio</div><div class="v">${brl(k.ticketMedio)}</div><span class="d">${num(k.unidades)} itens vendidos</span></div>
+    <div class="tile"><div class="k">Delivery × retirada</div><div class="v">${num(k.delivery)} × ${num(k.retirada)}</div><span class="d">pedidos de entrega × retirada</span></div>`;
+  $("novos").hidden = !j.novos; $("novos").textContent = j.novos;
+  desenha();
+}
+const dm = (d) => d.slice(8, 10) + "/" + d.slice(5, 7);
+function desenha() {
+  const j = resumoAtual; if (!j) return;
+  // ranking
+  const top = j.topItens;
+  if (!top.length) $("gRank").innerHTML = '<p class="empty">Ainda não há pedidos pagos neste período.</p>';
+  else if (tabelaDe.rank) $("gRank").innerHTML = tabela(["Item", "Qtd.", "Receita"], top.map((i) => [esc(i.nome), num(i.q), brl(i.receita)]), [1, 2]);
+  else {
+    const max = Math.max(...top.map((i) => i.q));
+    $("gRank").innerHTML = `<div class="rank">${top.map((i) => `<div class="rk"><span class="nm">${esc(i.nome)}</span><div class="trk"><div class="fill" style="width:${i.q / max * 100}%"></div></div><span class="vl">${num(i.q)}</span></div>`).join("")}</div>`;
+    $("gRank").querySelectorAll(".rk").forEach((el, n) => ligaTip(el, `${top[n].nome}: ${num(top[n].q)} un. · ${brl(top[n].receita)}`));
+  }
+  // horário (janela de atendimento 18h–05h; fora dela, uma coluna "outras")
+  const ordem = [18, 19, 20, 21, 22, 23, 0, 1, 2, 3, 4, 5];
+  const horas = ordem.map((h) => ({ rot: String(h).padStart(2, "0") + "h", n: j.porHora[h].pedidos }));
+  const fora = j.porHora.reduce((s, x) => s + (ordem.includes(x.hora) ? 0 : x.pedidos), 0);
+  if (fora) horas.push({ rot: "Outras", n: fora });
+  colunas("gHora", "hora", horas.map((h) => ({ rot: h.rot, v: h.n, tip: `${h.rot}: ${num(h.n)} pedido(s)`, cel: [h.rot, num(h.n)] })), ["Horário", "Pedidos"], [1], j.kpis.pedidos);
+  // dia
+  const dias = j.porDia;
+  colunas("gDia", "dia", dias.map((d, i) => ({ rot: dias.length <= 10 || i % Math.ceil(dias.length / 8) === 0 ? dm(d.dia) : "", v: d.receita, tip: `${dm(d.dia)}: ${brl(d.receita)} · ${num(d.pedidos)} pedido(s)`, cel: [dm(d.dia), brl(d.receita), num(d.pedidos)] })), ["Dia", "Faturamento", "Pedidos"], [1, 2], j.kpis.pedidos);
+}
+function colunas(alvo, chave, dados, cab, numCols, total) {
+  const el = $(alvo);
+  if (!total) { el.innerHTML = '<p class="empty">Ainda não há pedidos pagos neste período.</p>'; return; }
+  if (tabelaDe[chave]) { el.innerHTML = tabela(cab, dados.map((d) => d.cel), numCols); return; }
+  const max = Math.max(...dados.map((d) => d.v)) || 1;
+  el.innerHTML = `<div class="cols ${dados.length <= 14 ? "g4" : ""}" style="--n:${dados.length}">${dados.map((d) => `<div class="col"><i style="height:${d.v / max * 100}%"></i></div>`).join("")}</div>
+    <div class="lbls">${dados.map((d) => `<span>${esc(d.rot)}</span>`).join("")}</div>`;
+  el.querySelectorAll(".col").forEach((c, n) => ligaTip(c, dados[n].tip));
+}
+function tabela(cab, linhas, numCols) {
+  return `<div class="tbl"><table><thead><tr>${cab.map((c, i) => `<th class="${numCols.includes(i) ? "n" : ""}">${c}</th>`).join("")}</tr></thead><tbody>${linhas.map((l) => `<tr>${l.map((c, i) => `<td class="${numCols.includes(i) ? "n" : ""}">${c}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+document.querySelectorAll("[data-tabela]").forEach((b) => b.onclick = () => {
+  const k = b.dataset.tabela; tabelaDe[k] = !tabelaDe[k]; b.textContent = tabelaDe[k] ? "Ver como gráfico" : "Ver como tabela"; desenha();
+});
+
+/* ---------- pedidos ---------- */
+const FILTROS = [["ativos", "Em andamento"], ["todos", "Todos"], ["entregue", "Entregues"], ["cancelado", "Cancelados"], ["aguardando_pagamento", "Sem pagamento"]];
+$("filtros").innerHTML = FILTROS.map(([k, n]) => `<button class="chip" data-f="${k}" aria-pressed="${k === filtro}">${n}</button>`).join("");
+document.querySelectorAll("#filtros .chip").forEach((b) => b.onclick = () => { filtro = b.dataset.f; document.querySelectorAll("#filtros .chip").forEach((x) => x.setAttribute("aria-pressed", x === b)); carregarPedidos(); });
+$("recarregar").onclick = carregarPedidos;
+async function carregarPedidos() {
+  const qs = filtro === "ativos" || filtro === "todos" ? `&status=${filtro === "todos" ? "todos" : ""}` : `&status=${filtro}`;
+  const j = await api("pedidos", { qs });
+  let lista = j.pedidos;
+  if (filtro === "ativos") lista = lista.filter((p) => ["pago", "a_combinar", "em_preparo", "pronto"].includes(p.status));
+  $("listaPedidos").innerHTML = lista.length ? lista.map(cartaoPedido).join("") : '<p class="empty">Nenhum pedido aqui.</p>';
+  $("listaPedidos").querySelectorAll("[data-id]").forEach((b) => b.onclick = () => mudarStatus(b.dataset.id, b.dataset.s, b));
+  const novos = j.pedidos.filter((p) => ["pago", "a_combinar"].includes(p.status)).length;
+  if (filtro === "ativos") { $("novos").hidden = !novos; $("novos").textContent = novos; }
+}
+function cartaoPedido(p) {
+  const prox = PROXIMO[p.status];
+  const tel = String(p.telefone).replace(/\D/g, "");
+  return `<article class="ped ${["pago", "a_combinar"].includes(p.status) ? "novo" : ""}">
+    <div class="ped-h"><b>${esc(p.nome)} · ${brl(p.total)}</b><span class="st ${esc(p.status)}">${esc(STATUS[p.status] || p.status)}</span></div>
+    <div class="meta"><span>${new Date(p.criado_em).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} · ${esc(p.ref)} · ${p.forma === "online" ? "pago online" + (p.mp_metodo ? " (" + esc(p.mp_metodo) + ")" : "") : "pagar na entrega/retirada"}</span></div>
+    <ul>${p.itens.map((i) => `<li>${num(i.q)}× ${esc(i.nome)}${i.pao ? ` (pão de ${esc(String(i.pao).toLowerCase())})` : ""}</li>`).join("")}</ul>
+    <div class="meta"><span><b>${esc(p.tipo)}</b>${p.endereco ? " · " + esc(p.endereco) : ""}</span>${p.obs ? `<span>Obs.: ${esc(p.obs)}</span>` : ""}
+      <span>Tel.: <a href="https://wa.me/55${esc(tel.replace(/^55/, ""))}" target="_blank" rel="noopener">${esc(p.telefone)}</a>${p.taxa > 0 ? ` · taxa de entrega ${brl(p.taxa)}` : ""}</span></div>
+    <div class="acts">${prox ? `<button class="btn sm" data-id="${esc(p.id)}" data-s="${prox[0]}">${prox[1]}</button>` : ""}
+      ${p.status === "a_combinar" ? `<button class="btn ghost sm" data-id="${esc(p.id)}" data-s="pago">Marcar como pago</button>` : ""}
+      ${["pago", "a_combinar", "em_preparo", "pronto"].includes(p.status) ? `<button class="btn ghost sm" data-id="${esc(p.id)}" data-s="cancelado">Cancelar</button>` : ""}</div>
+  </article>`;
+}
+async function mudarStatus(id, status, btn) {
+  if (status === "cancelado" && !confirm("Cancelar este pedido? Se já foi pago online, o estorno é feito no Mercado Pago.")) return;
+  btn.disabled = true;
+  try { await api("pedido_status", { method: "POST", body: { id, status } }); await carregarPedidos(); } catch (e) { alert(e.message); btn.disabled = false; }
+}
+
+/* ---------- cardápio e preços ---------- */
+const lerPreco = (s) => Number(String(s).replace(/\./g, "").replace(",", "."));
+async function carregarItens() {
+  const j = await api("itens"); itensAtual = j;
+  $("taxa").value = String(j.taxaEntrega).replace(".", ",");
+  $("nCat").innerHTML = j.categorias.map((c) => `<option value="${esc(c.id)}">${esc(c.nome)}</option>`).join("");
+  $("listaItens").innerHTML = j.categorias.map((c) => {
+    const its = j.itens.filter((i) => i.cat === c.id);
+    return its.length ? `<div class="cat-t">${esc(c.nome)}</div>` + its.map((i) => `
+      <div class="it ${i.ativo ? "" : "off"}" data-id="${esc(i.id)}">
+        <div><div class="nm">${esc(i.nome)}</div>${i.verificar ? '<span class="warn">⚠ Confira este preço (veio de foto antiga do cardápio)</span>' : ""}</div>
+        <div class="ctl">
+          <label class="chk"><input type="checkbox" class="ativo" ${i.ativo ? "checked" : ""}> Disponível</label>
+          <input class="preco" inputmode="decimal" aria-label="Preço de ${esc(i.nome)}" value="${String(i.preco.toFixed(2)).replace(".", ",")}">
+          <button class="btn sm salvar" disabled>Salvar</button>
+        </div></div>`).join("") : "";
+  }).join("");
+  document.querySelectorAll("#listaItens .it").forEach((row) => {
+    const it = j.itens.find((x) => x.id === row.dataset.id), btn = row.querySelector(".salvar"), pr = row.querySelector(".preco"), at = row.querySelector(".ativo");
+    const sujo = () => { const p = lerPreco(pr.value); const valido = Number.isFinite(p) && p >= 0; btn.disabled = !(valido && (Math.abs(p - it.preco) > 0.001 || at.checked !== it.ativo || it.verificar)); };
+    pr.oninput = sujo; at.onchange = sujo; sujo();
+    btn.onclick = async () => {
+      const p = lerPreco(pr.value);
+      if (!Number.isFinite(p) || p < 0 || p > 5000) { alert("Preço inválido."); return; }
+      btn.disabled = true; btn.textContent = "Salvando…";
+      try { await api("item_salvar", { method: "POST", body: { id: it.id, preco: p, ativo: at.checked } }); await carregarItens(); } catch (e) { alert(e.message); btn.textContent = "Salvar"; btn.disabled = false; }
+    };
+  });
+}
+$("salvaTaxa").onclick = async () => {
+  const t = lerPreco($("taxa").value); $("taxaMsg").textContent = "";
+  try { await api("config", { method: "POST", body: { taxaEntrega: t } }); $("taxaMsg").textContent = "Salvo."; } catch (e) { alert(e.message); }
+};
+$("fNovo").onsubmit = async (e) => {
+  e.preventDefault(); $("nErro").textContent = "";
+  try {
+    await api("item_novo", { method: "POST", body: { nome: $("nNome").value, categoria: $("nCat").value, preco: lerPreco($("nPreco").value), descricao: $("nDesc").value } });
+    $("nNome").value = $("nPreco").value = $("nDesc").value = ""; await carregarItens();
+  } catch (err) { $("nErro").textContent = err.message; }
+};
+
+/* ---------- equipe e histórico ---------- */
+async function carregarEquipe() {
+  const j = await api("equipe");
+  $("admins").innerHTML = tabela(["Nome", "E-mail"], j.admins.map((a) => [esc(a.nome || "—"), esc(a.email) + (a.email === j.voce ? " (você)" : "")]), []);
+}
+$("fEquipe").onsubmit = async (e) => {
+  e.preventDefault(); $("eErro").textContent = "";
+  try { await api("equipe", { method: "POST", body: { email: $("eMail").value, role: $("eRole").value } }); $("eMail").value = ""; await carregarEquipe(); } catch (err) { $("eErro").textContent = err.message; }
+};
+const ACOES = { item_salvar: "Item alterado", item_novo: "Item criado", taxa_entrega: "Taxa de entrega", equipe: "Acesso de equipe", pedido_status: "Status de pedido" };
+function descreve(h) {
+  const d = h.detalhes || {};
+  if (h.acao === "item_salvar") return [esc(d.nome || d.id), d.preco ? `preço ${brl(d.preco[0])} → ${brl(d.preco[1])}` : "", d.ativo ? (d.ativo[1] ? "voltou ao cardápio" : "tirado do cardápio") : ""].filter(Boolean).join(" · ");
+  if (h.acao === "item_novo") return `${esc(d.nome)} (${brl(d.preco)})`;
+  if (h.acao === "taxa_entrega") return brl(d.valor);
+  if (h.acao === "equipe") return `${esc(d.email)} → ${esc(d.role)}`;
+  if (h.acao === "pedido_status") return `${esc(d.ref)} → ${esc(STATUS[d.status] || d.status)}`;
+  return "";
+}
+async function carregarHistorico() {
+  const j = await api("historico");
+  $("hist").innerHTML = j.itens.length ? tabela(["Quando", "Quem", "O quê", "Detalhes"], j.itens.map((h) => [new Date(h.quando).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }), esc(h.quem), esc(ACOES[h.acao] || h.acao), descreve(h)]), []) : '<p class="empty">Nada por aqui ainda.</p>';
+}
+
+/* ---------- início ---------- */
+async function iniciar() {
+  if (!auth.logado()) { mostrar("gate"); return; }
+  try {
+    await api("resumo", { qs: "&dias=7" });   // também confere se a conta é admin
+  } catch { return; }
+  $("quem").textContent = auth.email();
+  mostrar("app");
+  const t = location.hash.replace("#", "");
+  irPara(["resumo", "pedidos", "cardapio", "equipe", "historico"].includes(t) ? t : "resumo");
+}
+setInterval(() => { if (!$("app").hidden && !document.hidden && (aba === "pedidos" || aba === "resumo")) carregarAba(); }, 30000);
+auth.config().then((c) => { if (!c) $("gErro").textContent = "Login ainda não configurado (faltam as variáveis do Supabase)."; });
+iniciar();
+</script>
+</body>
+</html>
