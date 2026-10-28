@@ -1,7 +1,8 @@
 // API do painel administrativo. TODA ação passa por exigirAdmin() no servidor:
 // só quem tem role "admin" no banco consegue ler ou alterar qualquer coisa aqui.
 const { db, exigirAdmin, limpa, arred, ehUuid, ehId, enc, auditar, corpo } = require("./_lib");
-const { carregarMenu } = require("./_menu");
+const { carregarMenu, validarBairros } = require("./_menu");
+const { horarios, validar, limparCache } = require("./_horario");
 
 const TZ = "America/Sao_Paulo";
 const PAGOS = ["pago", "em_preparo", "pronto", "entregue"];
@@ -76,9 +77,15 @@ async function pedidoStatus(req, res, ctx) {
   res.status(200).json({ ok: true, pedido: r[0] });
 }
 
+// consulta leve usada pelo alerta de pedido novo (pedidos pagos ou combinados por WhatsApp ainda não atendidos)
+async function novos(req, res) {
+  const rows = await db("pedidos?select=ref&status=in.(pago,a_combinar)&order=criado_em.desc&limit=100");
+  res.status(200).json({ refs: rows.map((r) => r.ref) });
+}
+
 async function itens(req, res) {
   const m = await carregarMenu({ todos: true });
-  res.status(200).json({ categorias: m.categorias, itens: m.itens, taxaEntrega: m.taxaEntrega });
+  res.status(200).json({ categorias: m.categorias, itens: m.itens, taxaEntrega: m.taxaEntrega, bairros: m.bairros });
 }
 
 const precoValido = (p) => Number.isFinite(p) && p >= 0 && p <= 5000;
@@ -128,6 +135,30 @@ async function config(req, res, ctx) {
   res.status(200).json({ taxaEntrega: m.taxaEntrega });
 }
 
+async function horariosRota(req, res, ctx) {
+  if (req.method === "POST") {
+    const novo = validar(corpo(req));
+    if (!novo) return res.status(400).json({ erro: "Horários inválidos. Use HH:MM e escolha os dias." });
+    await db("config?on_conflict=chave", { method: "POST", prefer: "return=minimal,resolution=merge-duplicates", body: { chave: "horarios", valor: novo } });
+    limparCache();
+    await auditar(ctx.user.email, "horarios", novo);
+    return res.status(200).json({ ok: true, horarios: novo });
+  }
+  res.status(200).json({ horarios: await horarios() });
+}
+
+async function bairrosRota(req, res, ctx) {
+  if (req.method === "POST") {
+    const lista = validarBairros(corpo(req).bairros);
+    if (!lista) return res.status(400).json({ erro: "Bairros inválidos. Cada linha precisa de nome (2 a 40 letras, sem repetir) e taxa de 0 a 100." });
+    await db("config?on_conflict=chave", { method: "POST", prefer: "return=minimal,resolution=merge-duplicates", body: { chave: "bairros", valor: lista } });
+    await auditar(ctx.user.email, "bairros", { total: lista.length, bairros: lista });
+    return res.status(200).json({ ok: true, bairros: lista });
+  }
+  const m = await carregarMenu({ todos: true });
+  res.status(200).json({ bairros: m.bairros, taxaEntrega: m.taxaEntrega });
+}
+
 async function equipe(req, res, ctx) {
   if (req.method === "POST") {
     const b = corpo(req);
@@ -148,7 +179,7 @@ async function historico(req, res) {
   res.status(200).json({ itens: await db("auditoria?select=*&order=quando.desc&limit=60") });
 }
 
-const rotas = { resumo, pedidos, pedido_status: pedidoStatus, itens, item_salvar: itemSalvar, item_novo: itemNovo, config, equipe, historico };
+const rotas = { resumo, novos, horarios: horariosRota, bairros: bairrosRota, pedidos, pedido_status: pedidoStatus, itens, item_salvar: itemSalvar, item_novo: itemNovo, config, equipe, historico };
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
@@ -158,7 +189,7 @@ module.exports = async (req, res) => {
     const acao = String((req.query && req.query.a) || "");
     const rota = rotas[acao];
     if (!rota) return res.status(404).json({ erro: "Ação desconhecida." });
-    const escrita = ["pedido_status", "item_salvar", "item_novo"].includes(acao) || (["config", "equipe"].includes(acao) && req.method === "POST");
+    const escrita = ["pedido_status", "item_salvar", "item_novo"].includes(acao) || (["config", "equipe", "horarios", "bairros"].includes(acao) && req.method === "POST");
     if (escrita && req.method !== "POST") return res.status(405).json({ erro: "Use POST." });
     await rota(req, res, ctx);
   } catch (e) {

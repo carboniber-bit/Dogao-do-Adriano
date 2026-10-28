@@ -31,14 +31,14 @@ h1,h2,h3{font-family:var(--display);font-weight:400;letter-spacing:.02em;line-he
 
 header{position:sticky;top:0;z-index:20;background:var(--red);color:#fff;box-shadow:0 2px 12px rgba(0,0,0,.2)}
 header .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px}
-.logo{font-family:var(--display);font-size:1.45rem;letter-spacing:.03em;text-decoration:none;display:flex;gap:8px;align-items:center;white-space:nowrap}
+.logo{font-family:var(--display);font-size:1.45rem;letter-spacing:.03em;text-decoration:none;display:flex;gap:8px;align-items:center;white-space:nowrap;min-width:0;overflow:hidden}
 .logo b{color:var(--mustard);font-weight:400}
 nav{display:none;gap:22px;font-weight:700;font-size:.95rem}
 nav a{text-decoration:none;opacity:.92}nav a:hover{opacity:1;text-decoration:underline}
 .cart-btn{background:var(--mustard);color:#2a1a12;border:0;border-radius:999px;padding:10px 16px;font:700 .95rem var(--body);cursor:pointer;display:flex;gap:8px;align-items:center;min-height:44px}
 .cart-btn .n{background:#2a1a12;color:var(--mustard);border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;font-size:.8rem;padding:0 6px}
 @media(min-width:760px){nav{display:flex}}
-@media(max-width:480px){.logo{font-size:1.2rem}.cart-btn .t{display:none}.cart-btn{padding:10px 14px}}
+@media(max-width:480px){.logo{font-size:1.2rem}.hdr-r{flex:none}.cart-btn .t{display:none}.cart-btn{padding:10px 14px}}
 
 .hero{background:radial-gradient(circle at 85% 20%,rgba(245,184,46,.35),transparent 45%),linear-gradient(160deg,#c8281e 0%,#8f160f 100%);color:#fff;padding:44px 0 56px;overflow:hidden}
 .hero .wrap{display:grid;gap:28px;align-items:center}
@@ -74,6 +74,7 @@ section{padding:52px 0}
 .price{font-weight:700;font-size:1.15rem;color:var(--red)}
 @media(prefers-color-scheme:dark){.price,.card h3{color:var(--mustard)}}
 .acts{display:flex;gap:8px;align-items:center}
+label select{width:100%}
 select{font:inherit;font-size:.9rem;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;min-height:40px}
 .add{background:var(--red);color:#fff;border:0;border-radius:10px;padding:9px 14px;font:700 .9rem var(--body);cursor:pointer;min-height:40px}
 .add:hover{background:var(--red-d)}
@@ -119,7 +120,17 @@ input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px sol
 .pay{width:100%;background:var(--red);color:#fff}
 .pay:hover:not(:disabled){background:var(--red-d)}
 .wa{width:100%;background:transparent;color:var(--ink);border-color:#1faa59}
-.pay:disabled,.wa:disabled{opacity:.45;cursor:not-allowed}
+.sec{width:100%;background:transparent;color:var(--ink);border-color:var(--line)}
+.sec:hover:not(:disabled){border-color:var(--red)}
+.pay:disabled,.wa:disabled,.sec:disabled{opacity:.45;cursor:not-allowed}
+.pix-valor{font:400 2.2rem var(--display);color:var(--red);margin:0 0 10px!important;letter-spacing:.02em}
+@media(prefers-color-scheme:dark){.pix-valor{color:var(--mustard)}}
+.pix-qr{display:block;margin:0 auto 14px;width:220px;height:220px;max-width:100%;background:#fff;padding:10px;border-radius:12px;border:1px solid var(--line);image-rendering:pixelated}
+.pix-status{font-weight:700;color:var(--ink)!important;text-align:center;margin:12px 0 4px!important}
+.pix-tempo,.pix-dica{font-size:.88rem;text-align:center;margin-bottom:10px!important}
+.pix-dica{text-align:left}
+#dlgPix:focus{outline:none}
+#dlgPix input[readonly]{font-size:.8rem;text-overflow:ellipsis}
 .fine{font-size:.78rem;color:var(--muted);text-align:center}
 .erro{color:var(--red);font-size:.9rem;font-weight:700;text-align:center}
 @media(prefers-color-scheme:dark){.erro{color:#ff8f86}}
@@ -145,6 +156,7 @@ dialog form{display:grid;gap:10px}
 .msg{font-size:.88rem;font-weight:700;color:var(--red);min-height:1.2em}
 .msg.ok{color:var(--ok)}
 dialog.larga{max-width:520px}
+@media(max-width:380px){.logo{font-size:1.05rem}.acc-btn{max-width:96px;padding:8px 10px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
@@ -189,8 +201,8 @@ dialog.larga{max-width:520px}
   </div>
 
   <div class="strip"><div class="wrap">
-    <span id="stDelivery"><i class="dot"></i>Delivery: 18:30 à 01:00 (exceto terças)</span>
-    <span id="stRetirada"><i class="dot"></i>Na praça: 18:30 às 05:00, todos os dias</span>
+    <span id="stDelivery"><i class="dot"></i><span class="txt">Delivery: 18:30 às 01:00 (exceto terças)</span></span>
+    <span id="stRetirada"><i class="dot"></i><span class="txt">Na praça: 18:30 às 05:00, todos os dias</span></span>
   </div></div>
 
   <section id="cardapio"><div class="wrap">
@@ -217,7 +229,7 @@ dialog.larga{max-width:520px}
     <p class="sec-sub">Lanchonete de um lado e, de frente, o carrinho na praça.</p>
     <div class="cards">
       <div class="card"><h3>Endereço</h3><p>R. Vicente Celestino, 108<br>Santo Antônio, Osasco – SP, 06126-100</p><p style="margin-top:10px"><a href="https://www.google.com/maps/place/Dog%C3%A3o+do+Adriano/@-23.5533845,-46.7937179,17z" target="_blank" rel="noopener"><b>Abrir no Google Maps →</b></a></p></div>
-      <div class="card"><h3>Horários</h3><p><b>Na praça:</b> 18:30 às 05:00, todos os dias.<br><b>iFood e delivery:</b> 18:30 à 01:00. Não entregamos às terças.</p></div>
+      <div class="card"><h3>Horários</h3><p><b>Na praça:</b> <span id="hRetirada">18:30 às 05:00, todos os dias</span>.<br><b>iFood e delivery:</b> <span id="hDelivery">18:30 às 01:00, exceto terças</span>.</p></div>
       <div class="card"><h3>Contato</h3><p><a href="https://wa.me/5511990173256" target="_blank" rel="noopener"><b>WhatsApp (11) 99017-3256</b></a></p><p style="margin-top:10px"><span class="stars" aria-hidden="true">★★★★☆</span> 4,2 · 2.418 avaliações no Google</p><p style="margin-top:10px">Pagamento: dinheiro, cartão débito e crédito, Pix, VR e Sodexo (presencial).</p></div>
     </div>
   </div></section>
@@ -236,11 +248,13 @@ dialog.larga{max-width:520px}
       <fieldset>
         <label for="nome">Seu nome<input id="nome" autocomplete="name" placeholder="Como podemos te chamar?"></label>
         <label for="tel">Telefone (WhatsApp)<input id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="(11) 90000-0000"></label>
+        <label for="email">E-mail (para o Pix)<input id="email" type="email" autocomplete="email" inputmode="email" maxlength="120" placeholder="voce@email.com"></label>
         <div class="seg" role="radiogroup" aria-label="Tipo de pedido">
           <label><input type="radio" name="tipo" value="Delivery" checked><span>🛵 Delivery</span></label>
           <label><input type="radio" name="tipo" value="Retirada"><span>🏃 Retirada</span></label>
         </div>
         <label id="endWrap" for="end">Endereço de entrega<input id="end" autocomplete="street-address" placeholder="Rua, número, bairro, complemento"></label>
+        <label id="bairroWrap" for="bairro" hidden>Bairro (define a taxa de entrega)<select id="bairro"></select></label>
         <label for="obs">Observações<textarea id="obs" rows="2" maxlength="200" placeholder="Ex.: sem milho, molho à parte…"></textarea></label>
       </fieldset>
     </form>
@@ -250,9 +264,10 @@ dialog.larga{max-width:520px}
     <div class="sum" id="sumTaxa" hidden><span>Taxa de entrega</span><span id="taxa"></span></div>
     <div class="total"><span>Total</span><span id="total">R$ 0,00</span></div>
     <p class="erro" id="erro" role="alert" hidden></p>
-    <button class="btn pay" id="pagar" disabled>Pagar online (Pix ou cartão)</button>
+    <button class="btn pay" id="pix" disabled>Pagar com Pix</button>
+    <button class="btn sec" id="pagar" disabled>Pagar com cartão (Mercado Pago)</button>
     <button class="btn wa" id="zap" disabled>Pedir no WhatsApp e pagar na entrega</button>
-    <p class="fine">Pagamento online processado pelo Mercado Pago. Seus dados de cartão não passam por aqui.</p>
+    <p class="fine">Pix e cartão processados pelo Mercado Pago. Seus dados de cartão não passam por aqui.</p>
   </div>
 </aside>
 
@@ -304,6 +319,21 @@ dialog.larga{max-width:520px}
   <button class="btn btn-y" id="resFechar">Fechar</button>
 </dialog>
 
+<dialog id="dlgPix" tabindex="-1" aria-labelledby="pixTit">
+  <h2 id="pixTit">Pague com Pix</h2>
+  <p class="pix-valor" id="pixValor"></p>
+  <div id="pixCorpo">
+    <img class="pix-qr" id="pixQr" alt="QR code do Pix" width="220" height="220">
+    <label for="pixCopia">Pix Copia e Cola<input id="pixCopia" readonly></label>
+    <button class="btn pay" type="button" id="pixCopiar">Copiar código Pix</button>
+    <p class="pix-dica" id="pixDica" style="margin-top:12px"></p>
+  </div>
+  <p class="pix-status" id="pixStatus" role="status" aria-live="polite">Aguardando pagamento…</p>
+  <p class="pix-tempo" id="pixTempoWrap">O código expira em <b id="pixTempo">30:00</b></p>
+  <button class="btn pay" type="button" id="pixNovo" hidden>Gerar novo código</button>
+  <button class="btn btn-y" type="button" id="pixFechar">Fechar</button>
+</dialog>
+
 <script src="/auth.js"></script>
 <script>
 const $ = (id) => document.getElementById(id);
@@ -326,6 +356,7 @@ async function carregarMenu() {
     if (!r.ok) throw new Error(r.status);
     MENU = await r.json();
     MENU.itens.forEach((i) => porId.set(i.id, i));
+    montarBairros();
     tab = MENU.categorias[0].id;
     renderTabs(); renderGrid(); restaurarCarrinho(); renderCart();
   } catch (e) {
@@ -375,10 +406,27 @@ function restaurarCarrinho() {
   (store.get("dogao_cart") || []).forEach((l) => { if (porId.has(l.id) && l.q > 0) cart.set(chave(l.id, l.pao), l); });
 }
 const tipo = () => document.querySelector('input[name="tipo"]:checked').value;
+// taxa por bairro (se o painel tiver lista) ou única. O servidor recalcula; aqui é só para mostrar.
+const precisaBairro = () => tipo() === "Delivery" && Boolean(MENU && MENU.bairros && MENU.bairros.length);
+function taxaEntrega() {
+  if (tipo() !== "Delivery") return 0;
+  if (!precisaBairro()) return MENU.taxaEntrega || 0;
+  const v = $("bairro").value;
+  if (v === "__outro") return MENU.taxaEntrega || 0;
+  const b = MENU.bairros.find((x) => x.nome === v);
+  return b ? b.taxa : 0;
+}
+function montarBairros() {
+  const l = (MENU && MENU.bairros) || [];
+  const preco = (t) => (t > 0 ? brl(t) : "entrega grátis");
+  $("bairro").innerHTML = l.length
+    ? `<option value="">Escolha o bairro</option>` + l.map((b) => `<option value="${esc(b.nome)}">${esc(b.nome)} — ${preco(b.taxa)}</option>`).join("") + `<option value="__outro">Outro bairro — ${preco(MENU.taxaEntrega || 0)}</option>`
+    : "";
+}
 function totais() {
   let n = 0, sub = 0;
   cart.forEach((l) => { n += l.q; sub += l.q * porId.get(l.id).preco; });
-  const taxa = tipo() === "Delivery" && n > 0 ? (MENU.taxaEntrega || 0) : 0;
+  const taxa = n > 0 ? taxaEntrega() : 0;
   return { n, sub, taxa, total: sub + taxa };
 }
 function renderCart() {
@@ -386,7 +434,8 @@ function renderCart() {
   const { n, taxa, total } = totais();
   $("count").textContent = n;
   $("total").textContent = brl(total);
-  $("sumTaxa").hidden = !(taxa > 0); $("taxa").textContent = brl(taxa);
+  const faltaBairro = n > 0 && precisaBairro() && !$("bairro").value;
+  $("sumTaxa").hidden = !(taxa > 0 || faltaBairro); $("taxa").textContent = faltaBairro ? "escolha o bairro" : brl(taxa);
   $("lines").innerHTML = n === 0
     ? `<p class="empty">Seu carrinho está vazio.<br>Escolha algo no cardápio 🌭</p>`
     : [...cart].map(([k, l]) => { const m = porId.get(l.id);
@@ -395,6 +444,7 @@ function renderCart() {
         <b>${brl(l.q * m.preco)}</b></div>`; }).join("");
   $("lines").querySelectorAll(".qty button").forEach((b) => b.onclick = () => { const l = cart.get(b.dataset.k); mudar(l.id, l.pao, +b.dataset.d); });
   $("endWrap").style.display = tipo() === "Delivery" ? "grid" : "none";
+  $("bairroWrap").hidden = !precisaBairro();
   atualizarBotoes();
 }
 function atualizarBotoes() {
@@ -403,8 +453,8 @@ function atualizarBotoes() {
   const fechado = st && !st.aberto;
   $("aviso").hidden = !fechado; if (fechado) $("aviso").textContent = "Fechado agora. " + st.msg;
   const online = !horario || horario.pagamentoOnline !== false;
-  $("pagar").disabled = n === 0 || fechado || !online;
-  $("pagar").title = online ? "" : "Pagamento online indisponível no momento";
+  $("pagar").disabled = $("pix").disabled = n === 0 || fechado || !online;
+  $("pagar").title = $("pix").title = online ? "" : "Pagamento online indisponível no momento";
   $("zap").disabled = n === 0;
 }
 
@@ -417,10 +467,17 @@ function gaveta(abrir) {
 $("openCart").onclick = () => gaveta(true);
 $("closeCart").onclick = () => gaveta(false);
 $("overlay").onclick = () => gaveta(false);
-document.addEventListener("keydown", (e) => { if (e.key === "Escape") gaveta(false); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !document.querySelector("dialog[open]")) gaveta(false); });
 document.querySelectorAll('input[name="tipo"]').forEach((r) => r.onchange = renderCart);
+$("bairro").onchange = renderCart;
 
 /* ---------- horário ---------- */
+const NOME_DIAS = ["domingos", "segundas", "terças", "quartas", "quintas", "sextas", "sábados"];
+function textoHorario(h) {
+  const falta = [0, 1, 2, 3, 4, 5, 6].filter((d) => !h.dias.includes(d)).map((d) => NOME_DIAS[d]);
+  const dias = h.dias.length === 7 ? "todos os dias" : h.dias.length === 0 ? "fechado" : falta.length <= 2 ? "exceto " + falta.join(" e ") : h.dias.map((d) => NOME_DIAS[d]).join(", ");
+  return h.dias.length === 0 ? "fechado no momento" : `${h.abre} às ${h.fecha}, ${dias}`;
+}
 async function carregarHorario() {
   try {
     const r = await fetch("/api/status", { cache: "no-store" });
@@ -430,19 +487,27 @@ async function carregarHorario() {
       const el = $(id), on = horario[t].aberto;
       el.querySelector(".dot").className = "dot " + (on ? "on" : "off");
       el.dataset.s = on ? "Aberto agora" : "Fechado agora";
-      el.firstChild.nextSibling.textContent = (on ? "Aberto agora · " : "Fechado agora · ") + (t === "Delivery" ? "Delivery até 01:00" : "Na praça até 05:00");
+      const h = horario.horarios && horario.horarios[t];
+      el.querySelector(".txt").textContent = (on ? "Aberto agora · " : "Fechado agora · ") + (t === "Delivery" ? "Delivery" : "Na praça") + (h ? ` até ${h.fecha}` : "");
+    }
+    if (horario.horarios) {
+      $("hRetirada").textContent = textoHorario(horario.horarios.Retirada);
+      $("hDelivery").textContent = textoHorario(horario.horarios.Delivery);
     }
   } catch { horario = null; }
   renderCart();
 }
 
 /* ---------- envio do pedido ---------- */
-function lerDados(exigirEndereco = true) {
-  const d = { nome: $("nome").value.trim(), telefone: $("tel").value.replace(/\D/g, ""), tipo: tipo(), endereco: $("end").value.trim(), obs: $("obs").value.trim() };
+const EMAIL_OK = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function lerDados(exigirEmail = false) {
+  const d = { nome: $("nome").value.trim(), telefone: $("tel").value.replace(/\D/g, ""), tipo: tipo(), endereco: $("end").value.trim(), obs: $("obs").value.trim(), email: $("email").value.trim(), bairro: precisaBairro() ? $("bairro").value : "" };
   const falha = (campo, msg) => { $(campo).focus(); mostrarErro(msg); return null; };
   if (d.nome.length < 2) return falha("nome", "Informe seu nome.");
   if (d.telefone.length < 10) return falha("tel", "Informe um telefone com DDD.");
   if (d.tipo === "Delivery" && d.endereco.length < 6) return falha("end", "Informe o endereço de entrega.");
+  if (precisaBairro() && !d.bairro) return falha("bairro", "Escolha o bairro da entrega.");
+  if (exigirEmail && (d.email.length > 120 || !EMAIL_OK.test(d.email))) return falha("email", "Informe um e-mail válido para o Pix.");
   mostrarErro(""); return d;
 }
 document.getElementById("form").addEventListener("input", () => mostrarErro(""));
@@ -453,7 +518,7 @@ function textoPedido(d, ref) {
   let t = ref ? `Pedido ${ref} (pago online)\n` : `Olá, Dogão do Adriano! Quero fazer um pedido:\n\n`;
   cart.forEach((l) => { const m = porId.get(l.id); t += `• ${l.q}x ${m.nome}${l.pao ? ` (pão de ${l.pao.toLowerCase()})` : ""} — ${brl(l.q * m.preco)}\n`; });
   t += `\nTotal: ${brl(total)}${ref ? "" : " (pagamento na entrega/retirada)"}\nTipo: ${d.tipo}\nNome: ${d.nome}\nTelefone: ${d.telefone}`;
-  if (d.tipo === "Delivery") t += `\nEndereço: ${d.endereco}`;
+  if (d.tipo === "Delivery") t += `\nEndereço: ${d.endereco}${d.bairro ? (d.bairro === "__outro" ? " (outro bairro)" : ` (bairro: ${d.bairro})`) : ""}`;
   if (d.obs) t += `\nObs.: ${d.obs}`;
   return t;
 }
@@ -463,7 +528,7 @@ $("zap").onclick = async () => {
   let ref = "";
   try {
     const r = await auth.fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...d, modo: "whatsapp", itens: [...cart.values()].map((l) => ({ id: l.id, pao: l.pao, q: l.q })) }) });
+      body: JSON.stringify({ ...d, email: undefined, modo: "whatsapp", itens: [...cart.values()].map((l) => ({ id: l.id, pao: l.pao, q: l.q })) }) });
     const j = await r.json().catch(() => ({}));
     if (r.ok && j.ref) ref = j.ref; else if (r.status === 400) { if (w) w.close(); return mostrarErro(j.erro || "Confira o pedido."); }
   } catch { /* se o registro falhar, o pedido ainda segue pelo WhatsApp */ }
@@ -478,15 +543,113 @@ $("pagar").onclick = async () => {
   try {
     const r = await auth.fetch("/api/checkout", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...d, itens: [...cart.values()].map((l) => ({ id: l.id, pao: l.pao, q: l.q })) }),
+      body: JSON.stringify({ ...d, email: undefined, itens: [...cart.values()].map((l) => ({ id: l.id, pao: l.pao, q: l.q })) }),
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || !j.url) throw new Error(j.erro || "Não foi possível iniciar o pagamento.");
     store.set("dogao_pedido", { ref: j.ref, texto: textoPedido(d, j.ref) });
     location.href = j.url;
   } catch (e) {
-    mostrarErro(e.message); btn.textContent = "Pagar online (Pix ou cartão)"; atualizarBotoes();
+    mostrarErro(e.message); btn.textContent = "Pagar com cartão (Mercado Pago)"; atualizarBotoes();
   }
+};
+
+
+/* ---------- Pix dentro do site ---------- */
+const PAGO = ["pago", "em_preparo", "pronto", "entregue"], FALHOU = ["recusado", "cancelado"];
+let pixEstado = null; // {ref, expira, poll, tick, ativo, consultando}
+function pixParar() {
+  if (!pixEstado) return;
+  clearInterval(pixEstado.poll); clearInterval(pixEstado.tick); pixEstado.ativo = false;
+}
+function pixFim(msg, { novo = false, corpo = false } = {}) {
+  pixParar();
+  $("pixStatus").textContent = msg;
+  $("pixCorpo").hidden = !corpo; $("pixTempoWrap").hidden = true; $("pixNovo").hidden = !novo;
+  if (novo) $("pixNovo").focus();
+}
+function pixAprovado(ref) {
+  pixParar(); $("dlgPix").close();
+  const ped = store.get("dogao_pedido");
+  const dlg = $("resultado"), zap = $("resZap"), pre = $("resPedido");
+  $("resTitulo").textContent = "Pagamento aprovado! 🎉";
+  $("resTexto").textContent = `Recebemos seu pedido (${ref}). Para agilizar, envie os detalhes no WhatsApp.`;
+  zap.hidden = true; pre.hidden = true;
+  if (ped && ped.ref === ref) { pre.textContent = ped.texto; pre.hidden = false; zap.href = `https://wa.me/5511990173256?text=${encodeURIComponent(ped.texto)}`; zap.hidden = false; }
+  cart.clear(); salvarCarrinho(); renderCart(); store.del("dogao_pedido"); gaveta(false);
+  dlg.showModal();
+}
+async function pixConsultar() {
+  const e = pixEstado;
+  if (!e || !e.ativo || e.consultando) return;
+  e.consultando = true;
+  try {
+    const r = await fetch(`/api/pedido?ref=${encodeURIComponent(e.ref)}`, { cache: "no-store" });
+    if (!r.ok || e !== pixEstado || !e.ativo) return;
+    const { status } = await r.json();
+    if (PAGO.includes(status)) pixAprovado(e.ref);
+    else if (FALHOU.includes(status)) pixFim("Pagamento não concluído. Nada foi cobrado. Tente de novo.", { novo: true });
+  } catch { /* tenta de novo no próximo ciclo */ }
+  finally { e.consultando = false; }
+}
+function pixRelogio() {
+  const e = pixEstado; if (!e) return;
+  const falta = Math.max(0, Math.round((e.expira - Date.now()) / 1000));
+  $("pixTempo").textContent = String(Math.floor(falta / 60)).padStart(2, "0") + ":" + String(falta % 60).padStart(2, "0");
+  if (falta === 0 && e.ativo) pixExpirou(e);
+}
+async function pixExpirou(e) {
+  clearInterval(e.tick); clearInterval(e.poll);
+  e.consultando = false; await pixConsultar(); // última conferência: pode ter sido pago no limite
+  if (e === pixEstado && e.ativo) pixFim("O código expirou. Gere um novo.", { novo: true });
+}
+function pixMostrar(j) {
+  pixParar();
+  const expira = Date.parse(j.pix.expira) || Date.now() + 30 * 60000;
+  pixEstado = { ref: j.ref, expira, ativo: true, consultando: false };
+  const celular = matchMedia("(pointer:coarse)").matches || innerWidth < 700;
+  $("pixValor").textContent = brl(j.total);
+  $("pixQr").src = "data:image/png;base64," + j.pix.qr;
+  $("pixCopia").value = j.pix.copia;
+  $("pixCopiar").textContent = "Copiar código Pix";
+  $("pixDica").textContent = celular
+    ? "No celular: toque em Copiar código, abra o app do seu banco e use Pix > Pix Copia e Cola."
+    : "Abra o app do banco e escaneie o QR code, ou use Pix > Pix Copia e Cola.";
+  $("pixCorpo").hidden = false; $("pixTempoWrap").hidden = false; $("pixNovo").hidden = true;
+  $("pixStatus").textContent = "Aguardando pagamento…";
+  pixRelogio();
+  pixEstado.tick = setInterval(pixRelogio, 1000);
+  pixEstado.poll = setInterval(() => { if (!document.hidden) pixConsultar(); }, 4000);
+  if (!$("dlgPix").open) $("dlgPix").showModal();
+  $("dlgPix").focus();
+}
+async function gerarPix() {
+  const d = lerDados(true); if (!d) return;
+  const btn = $("pix"); btn.disabled = true; btn.textContent = "Gerando Pix…";
+  try {
+    const r = await auth.fetch("/api/checkout", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...d, modo: "pix", itens: [...cart.values()].map((l) => ({ id: l.id, pao: l.pao, q: l.q })) }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok || !j.pix) throw new Error(j.erro || "Não foi possível gerar o Pix. Tente de novo.");
+    store.set("dogao_pedido", { ref: j.ref, texto: textoPedido(d, j.ref) });
+    pixMostrar(j);
+  } catch (e) { mostrarErro(e.message); }
+  btn.textContent = "Pagar com Pix"; atualizarBotoes();
+}
+$("pix").onclick = gerarPix;
+$("pixNovo").onclick = () => { $("dlgPix").close(); gerarPix(); };
+$("pixFechar").onclick = () => $("dlgPix").close();
+$("dlgPix").addEventListener("close", () => { if (!$("dlgPix").open) pixParar(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) pixConsultar(); });
+$("pixCopiar").onclick = async () => {
+  const campo = $("pixCopia"), codigo = campo.value;
+  let ok = false;
+  try { await navigator.clipboard.writeText(codigo); ok = true; } catch { /* usa o plano B */ }
+  if (!ok) { campo.focus(); campo.select(); campo.setSelectionRange(0, codigo.length); try { ok = document.execCommand("copy"); } catch {} }
+  $("pixCopiar").textContent = ok ? "✓ Código copiado" : "Selecionado: use Copiar do teclado";
+  if (ok) setTimeout(() => { $("pixCopiar").textContent = "Copiar código Pix"; }, 2500);
 };
 
 /* ---------- retorno do Mercado Pago ---------- */
@@ -535,6 +698,7 @@ async function atualizarConta() {
     if (!$("nome").value) $("nome").value = j.perfil.nome || "";
     if (!$("tel").value) $("tel").value = j.perfil.telefone || "";
     if (!$("end").value) $("end").value = j.perfil.endereco || "";
+    if (!$("email").value) $("email").value = j.perfil.email || "";
   } catch { perfil = null; $("openConta").textContent = "Entrar"; }
 }
 function modoLogin(m) {

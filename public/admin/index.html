@@ -57,6 +57,9 @@ header{background:var(--surface);border-bottom:1px solid var(--line);position:st
 nav{display:flex;gap:4px;overflow-x:auto;padding-bottom:8px}
 nav button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font-weight:700;color:var(--ink2);cursor:pointer;white-space:nowrap;min-height:44px}
 nav button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--brand)}
+.alerta{position:sticky;top:0;z-index:30;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;padding:10px 16px;background:var(--brand);color:#fff;font-weight:700}
+.alerta[hidden]{display:none}
+.alerta .btn.ghost{color:#fff;border-color:rgba(255,255,255,.7)}
 .badge{background:var(--brand);color:#fff;border-radius:999px;font-size:.72rem;padding:1px 7px;margin-left:6px}
 
 main{padding:22px 0 60px}
@@ -170,7 +173,7 @@ a{color:inherit}
     <div class="wrap">
       <div class="top">
         <div class="brand">DOGÃO <b>DO ADRIANO</b> · painel</div>
-        <div class="top-r"><span id="quem"></span><a class="btn ghost sm" href="/">Ver site</a><button class="btn ghost sm" id="sair">Sair</button></div>
+        <div class="top-r"><button class="btn ghost sm" id="som" aria-pressed="false" title="Tocar um som quando chegar pedido novo">🔕 Som desligado</button><span id="quem"></span><a class="btn ghost sm" href="/">Ver site</a><button class="btn ghost sm" id="sair">Sair</button></div>
       </div>
       <nav role="tablist" id="abas">
         <button role="tab" data-t="resumo" aria-selected="true">Resumo</button>
@@ -181,6 +184,7 @@ a{color:inherit}
       </nav>
     </div>
   </header>
+  <div class="alerta" id="alerta" role="alert" hidden><span id="alertaTxt"></span> <button class="btn sm" id="alertaVer">Ver pedidos</button> <button class="btn ghost sm" id="alertaOk">Dispensar</button></div>
   <main class="wrap">
 
     <section id="t-resumo">
@@ -210,11 +214,23 @@ a{color:inherit}
 
     <section id="t-cardapio" hidden>
       <div class="card" style="margin-bottom:14px">
+        <h2>Horários de atendimento</h2>
+        <p style="color:var(--ink2);margin-bottom:10px;font-size:.9rem">Se o horário de fechar for menor que o de abrir (ex.: abre 18:30, fecha 01:00), o atendimento vai até a madrugada do dia seguinte. Fuso: Brasília.</p>
+        <div id="horarios"></div>
+        <div style="margin-top:10px"><button class="btn" id="salvaHorarios">Salvar horários</button> <span class="ok" id="horMsg"></span><span class="erro" id="horErro" role="alert"></span></div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
         <h2>Taxa de entrega</h2>
         <div class="form-row">
           <label for="taxa">Valor (R$), 0 para não cobrar<input id="taxa" inputmode="decimal"></label>
           <div><button class="btn" id="salvaTaxa">Salvar taxa</button> <span class="ok" id="taxaMsg"></span></div>
         </div>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <h2>Taxa de entrega por bairro (opcional)</h2>
+        <p style="color:var(--ink2);margin-bottom:10px;font-size:.9rem">Uma linha por bairro, no formato <b>Nome; valor</b> (ex.: <code>Centro; 6,00</code>). O cliente escolhe o bairro no carrinho e paga a taxa dele. Quem escolher "Outro bairro" paga a taxa única acima. Deixe em branco para cobrar a taxa única de todos.</p>
+        <label for="bairrosTxt">Bairros<textarea id="bairrosTxt" rows="6" placeholder="Centro; 6,00&#10;Vila Nova; 9,50"></textarea></label>
+        <div style="margin-top:10px"><button class="btn" id="salvaBairros">Salvar bairros</button> <span class="ok" id="bairrosMsg"></span><span class="erro" id="bairrosErro" role="alert"></span></div>
       </div>
       <div class="card" style="margin-bottom:6px">
         <h2>Novo item</h2>
@@ -298,7 +314,7 @@ async function carregarAba() {
   try {
     if (aba === "resumo") await carregarResumo();
     if (aba === "pedidos") await carregarPedidos();
-    if (aba === "cardapio") await carregarItens();
+    if (aba === "cardapio") { await carregarItens(); await carregarHorarios(); await carregarBairros(); }
     if (aba === "equipe") await carregarEquipe();
     if (aba === "historico") await carregarHistorico();
   } catch (e) { /* api() já tratou login/permissão */ }
@@ -388,6 +404,16 @@ async function carregarPedidos() {
   const novos = j.pedidos.filter((p) => ["pago", "a_combinar"].includes(p.status)).length;
   if (filtro === "ativos") { $("novos").hidden = !novos; $("novos").textContent = novos; }
 }
+// número para o WhatsApp: celular/fixo com DDD ganha 55; quem já veio com 55 + DDD + número (12 ou 13 dígitos) fica como está
+const zapTel = (tel) => { const t = String(tel).replace(/\D/g, ""); return t.length >= 12 && t.startsWith("55") ? t : "55" + t; };
+// mensagem pronta para o cliente (o dono só clica e envia; não usa API paga de WhatsApp)
+function msgCliente(p) {
+  const nome = String(p.nome).trim().split(/\s+/)[0];
+  const ini = `Olá, ${nome}! Aqui é o Dogão do Adriano 🌭 `;
+  if (p.status === "em_preparo") return ini + `Recebemos o seu pedido ${p.ref} e já estamos preparando.`;
+  if (p.status === "pronto") return ini + (p.tipo === "Delivery" ? `Seu pedido ${p.ref} está pronto e já vai sair para entrega 🛵` : `Seu pedido ${p.ref} está pronto! Pode vir retirar na praça 🌭`);
+  return "";
+}
 function cartaoPedido(p) {
   const prox = PROXIMO[p.status];
   const tel = String(p.telefone).replace(/\D/g, "");
@@ -396,8 +422,8 @@ function cartaoPedido(p) {
     <div class="meta"><span>${new Date(p.criado_em).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} · ${esc(p.ref)} · ${p.forma === "online" ? "pago online" + (p.mp_metodo ? " (" + esc(p.mp_metodo) + ")" : "") : "pagar na entrega/retirada"}</span></div>
     <ul>${p.itens.map((i) => `<li>${num(i.q)}× ${esc(i.nome)}${i.pao ? ` (pão de ${esc(String(i.pao).toLowerCase())})` : ""}</li>`).join("")}</ul>
     <div class="meta"><span><b>${esc(p.tipo)}</b>${p.endereco ? " · " + esc(p.endereco) : ""}</span>${p.obs ? `<span>Obs.: ${esc(p.obs)}</span>` : ""}
-      <span>Tel.: <a href="https://wa.me/55${esc(tel.replace(/^55/, ""))}" target="_blank" rel="noopener">${esc(p.telefone)}</a>${p.taxa > 0 ? ` · taxa de entrega ${brl(p.taxa)}` : ""}</span></div>
-    <div class="acts">${prox ? `<button class="btn sm" data-id="${esc(p.id)}" data-s="${prox[0]}">${prox[1]}</button>` : ""}
+      <span>Tel.: <a href="https://wa.me/${esc(zapTel(tel))}" target="_blank" rel="noopener">${esc(p.telefone)}</a>${p.taxa > 0 ? ` · taxa de entrega ${brl(p.taxa)}` : ""}</span></div>
+    <div class="acts">${["em_preparo", "pronto"].includes(p.status) ? `<a class="btn ghost sm avisar" href="https://wa.me/${esc(zapTel(tel))}?text=${encodeURIComponent(msgCliente(p))}" target="_blank" rel="noopener">📲 Avisar o cliente</a>` : ""}${prox ? `<button class="btn sm" data-id="${esc(p.id)}" data-s="${prox[0]}">${prox[1]}</button>` : ""}
       ${p.status === "a_combinar" ? `<button class="btn ghost sm" data-id="${esc(p.id)}" data-s="pago">Marcar como pago</button>` : ""}
       ${["pago", "a_combinar", "em_preparo", "pronto"].includes(p.status) ? `<button class="btn ghost sm" data-id="${esc(p.id)}" data-s="cancelado">Cancelar</button>` : ""}</div>
   </article>`;
@@ -410,6 +436,49 @@ async function mudarStatus(id, status, btn) {
 
 /* ---------- cardápio e preços ---------- */
 const lerPreco = (s) => Number(String(s).replace(/\./g, "").replace(",", "."));
+async function carregarBairros() {
+  const j = await api("bairros");
+  $("bairrosTxt").value = j.bairros.map((b) => `${b.nome}; ${b.taxa.toFixed(2).replace(".", ",")}`).join("\n");
+}
+$("salvaBairros").onclick = async () => {
+  $("bairrosMsg").textContent = ""; $("bairrosErro").textContent = "";
+  const bairros = [];
+  const linhas = $("bairrosTxt").value.split("\n");
+  for (let i = 0; i < linhas.length; i++) {
+    const l = linhas[i].trim(); if (!l) continue;
+    const k = l.lastIndexOf(";");
+    const bruto = k < 0 ? "" : l.slice(k + 1).trim();
+    const taxa = bruto === "" ? NaN : Number(bruto.includes(",") ? bruto.replace(/\./g, "").replace(",", ".") : bruto); // "6,50", "1.006,50" ou "6.5"
+    if (k < 0 || !Number.isFinite(taxa)) { $("bairrosErro").textContent = `Linha ${i + 1}: use o formato Nome; valor (ex.: Centro; 6,00).`; return; }
+    bairros.push({ nome: l.slice(0, k).trim(), taxa });
+  }
+  try { await api("bairros", { method: "POST", body: { bairros } }); $("bairrosMsg").textContent = bairros.length ? "Bairros salvos." : "Lista vazia: vale a taxa única."; await carregarBairros(); }
+  catch (e) { $("bairrosErro").textContent = e.message; }
+};
+const DIAS_CURTOS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+async function carregarHorarios() {
+  const { horarios } = await api("horarios");
+  $("horarios").innerHTML = ["Retirada", "Delivery"].map((t) => {
+    const h = horarios[t];
+    return `<fieldset class="hor" data-t="${t}" style="border:1px solid var(--line);border-radius:10px;padding:10px;margin:0 0 10px">
+      <legend style="font-weight:700;padding:0 6px">${t === "Delivery" ? "Delivery" : "Retirada / na praça"}</legend>
+      <div class="form-row">
+        <label>Abre<input type="time" class="abre" value="${esc(h.abre)}"></label>
+        <label>Fecha<input type="time" class="fecha" value="${esc(h.fecha)}"></label>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">${DIAS_CURTOS.map((n, d) => `<label class="chk"><input type="checkbox" class="dia" value="${d}" ${h.dias.includes(d) ? "checked" : ""}> ${n}</label>`).join("")}</div>
+    </fieldset>`;
+  }).join("");
+}
+$("salvaHorarios").onclick = async () => {
+  $("horMsg").textContent = ""; $("horErro").textContent = "";
+  const corpo = {};
+  document.querySelectorAll("#horarios .hor").forEach((f) => {
+    corpo[f.dataset.t] = { abre: f.querySelector(".abre").value, fecha: f.querySelector(".fecha").value, dias: [...f.querySelectorAll(".dia:checked")].map((c) => Number(c.value)) };
+  });
+  try { await api("horarios", { method: "POST", body: corpo }); $("horMsg").textContent = "Horários salvos."; await carregarHorarios(); }
+  catch (e) { $("horErro").textContent = e.message; }
+};
 async function carregarItens() {
   const j = await api("itens"); itensAtual = j;
   $("taxa").value = String(j.taxaEntrega).replace(".", ",");
@@ -458,12 +527,14 @@ $("fEquipe").onsubmit = async (e) => {
   e.preventDefault(); $("eErro").textContent = "";
   try { await api("equipe", { method: "POST", body: { email: $("eMail").value, role: $("eRole").value } }); $("eMail").value = ""; await carregarEquipe(); } catch (err) { $("eErro").textContent = err.message; }
 };
-const ACOES = { item_salvar: "Item alterado", item_novo: "Item criado", taxa_entrega: "Taxa de entrega", equipe: "Acesso de equipe", pedido_status: "Status de pedido" };
+const ACOES = { item_salvar: "Item alterado", item_novo: "Item criado", taxa_entrega: "Taxa de entrega", horarios: "Horários de atendimento", bairros: "Taxa por bairro", equipe: "Acesso de equipe", pedido_status: "Status de pedido" };
 function descreve(h) {
   const d = h.detalhes || {};
   if (h.acao === "item_salvar") return [esc(d.nome || d.id), d.preco ? `preço ${brl(d.preco[0])} → ${brl(d.preco[1])}` : "", d.ativo ? (d.ativo[1] ? "voltou ao cardápio" : "tirado do cardápio") : ""].filter(Boolean).join(" · ");
   if (h.acao === "item_novo") return `${esc(d.nome)} (${brl(d.preco)})`;
   if (h.acao === "taxa_entrega") return brl(d.valor);
+  if (h.acao === "bairros") return `${d.total} bairro(s)`;
+  if (h.acao === "horarios") return ["Retirada", "Delivery"].map((t) => d[t] ? `${t}: ${esc(d[t].abre)}–${esc(d[t].fecha)} (${d[t].dias.length} dias)` : "").filter(Boolean).join(" · ");
   if (h.acao === "equipe") return `${esc(d.email)} → ${esc(d.role)}`;
   if (h.acao === "pedido_status") return `${esc(d.ref)} → ${esc(STATUS[d.status] || d.status)}`;
   return "";
@@ -473,6 +544,54 @@ async function carregarHistorico() {
   $("hist").innerHTML = j.itens.length ? tabela(["Quando", "Quem", "O quê", "Detalhes"], j.itens.map((h) => [new Date(h.quando).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }), esc(h.quem), esc(ACOES[h.acao] || h.acao), descreve(h)]), []) : '<p class="empty">Nada por aqui ainda.</p>';
 }
 
+
+/* ---------- alerta de pedido novo ---------- */
+const TITULO = document.title;
+let vistos = null, naoVistos = 0, somLigado = false, audio = null, pisca = null;
+try { somLigado = localStorage.getItem("dogao_som") === "1"; } catch {}
+function desenharSom() { $("som").textContent = somLigado ? "🔔 Som ligado" : "🔕 Som desligado"; $("som").setAttribute("aria-pressed", somLigado); }
+function prepararAudio() {
+  try { audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === "suspended") audio.resume(); } catch { audio = null; }
+}
+function bipe() {
+  if (!somLigado) return; prepararAudio(); if (!audio) return;
+  [0, 0.28, 0.56].forEach((t, i) => {
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = "sine"; o.frequency.value = i === 2 ? 1175 : 880; o.connect(g); g.connect(audio.destination);
+    const ini = audio.currentTime + t; g.gain.setValueAtTime(0.0001, ini); g.gain.exponentialRampToValueAtTime(0.4, ini + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, ini + 0.22);
+    o.start(ini); o.stop(ini + 0.25);
+  });
+}
+$("som").onclick = () => {
+  somLigado = !somLigado; try { localStorage.setItem("dogao_som", somLigado ? "1" : "0"); } catch {}
+  desenharSom(); if (somLigado) { prepararAudio(); bipe(); }
+};
+document.addEventListener("click", () => { if (somLigado) prepararAudio(); }, { once: false });
+function limparAlerta() {
+  naoVistos = 0; $("alerta").hidden = true; clearInterval(pisca); pisca = null; document.title = TITULO;
+}
+function mostrarAlerta(n) {
+  naoVistos += n;
+  $("alertaTxt").textContent = naoVistos === 1 ? "🔔 Chegou 1 pedido novo!" : `🔔 Chegaram ${naoVistos} pedidos novos!`;
+  $("alerta").hidden = false; bipe();
+  if (!pisca) { let l = false; pisca = setInterval(() => { l = !l; document.title = l ? `(${naoVistos}) Novo pedido!` : TITULO; }, 1000); }
+}
+$("alertaVer").onclick = () => { limparAlerta(); filtro = "ativos"; irPara("pedidos"); };
+$("alertaOk").onclick = limparAlerta;
+document.addEventListener("visibilitychange", () => { if (!document.hidden) verificarNovos(); });
+async function verificarNovos() {
+  if ($("app").hidden) return;
+  try {
+    const { refs } = await api("novos");
+    if (vistos === null) { vistos = new Set(refs); return; }        // primeira leitura: só memoriza
+    const chegou = refs.filter((r) => !vistos.has(r));
+    refs.forEach((r) => vistos.add(r));
+    if (chegou.length) { mostrarAlerta(chegou.length); if (aba === "pedidos" || aba === "resumo") carregarAba(); }
+  } catch { /* tenta de novo no próximo ciclo */ }
+}
+desenharSom();
+setInterval(verificarNovos, 15000);
+
 /* ---------- início ---------- */
 async function iniciar() {
   if (!auth.logado()) { mostrar("gate"); return; }
@@ -480,7 +599,7 @@ async function iniciar() {
     await api("resumo", { qs: "&dias=7" });   // também confere se a conta é admin
   } catch { return; }
   $("quem").textContent = auth.email();
-  mostrar("app");
+  mostrar("app"); verificarNovos();
   const t = location.hash.replace("#", "");
   irPara(["resumo", "pedidos", "cardapio", "equipe", "historico"].includes(t) ? t : "resumo");
 }

@@ -6,7 +6,7 @@ module.exports = async (req, res) => {
     const m = await carregarMenu();
     const ativas = new Set(m.itens.map((i) => i.cat));
     res.status(200).json({
-      whatsapp: m.whatsapp, taxaEntrega: m.taxaEntrega,
+      whatsapp: m.whatsapp, taxaEntrega: m.taxaEntrega, bairros: m.bairros || [],
       categorias: m.categorias.filter((c) => ativas.has(c.id)),
       itens: m.itens.map(({ verificar, ...i }) => i),
     });
