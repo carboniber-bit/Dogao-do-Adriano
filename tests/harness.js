@@ -18,11 +18,15 @@ const uuid = () => crypto.randomUUID();
 const est = {};
 function reiniciar() {
   est.tabelas = {
-    categorias: [{ id: "dogs", nome: "Dogões", ordem: 1 }, { id: "bebidas", nome: "Bebidas", ordem: 2 }],
+    categorias: [{ id: "dogs", nome: "Dogões", ordem: 1 }, { id: "adicionais", nome: "Adicionais", ordem: 2 }, { id: "bebidas", nome: "Bebidas", ordem: 3 }],
     itens: [
       { id: "tradicional", categoria: "dogs", nome: "Dogão Tradicional", descricao: "", preco: 18, paes: ["Banha", "Sal"], encomenda: null, ativo: true, verificar: false, ordem: 1 },
       { id: "agua", categoria: "bebidas", nome: "Água", descricao: "", preco: 5, paes: null, encomenda: null, ativo: true, verificar: false, ordem: 2 },
       { id: "sumido", categoria: "bebidas", nome: "Item desativado", descricao: "", preco: 9, paes: null, encomenda: null, ativo: false, verificar: false, ordem: 3 },
+      { id: "bacon", categoria: "adicionais", nome: "Bacon", descricao: "", preco: 6, paes: null, encomenda: null, ativo: true, verificar: false, ordem: 5 },
+      { id: "pure", categoria: "adicionais", nome: "Purê", descricao: "", preco: 6, paes: null, encomenda: null, ativo: true, verificar: false, ordem: 6 },
+      { id: "queijo", categoria: "adicionais", nome: "Queijo ralado", descricao: "", preco: 2, paes: null, encomenda: null, ativo: true, verificar: false, ordem: 7 },
+      { id: "esgotado", categoria: "adicionais", nome: "Ovo", descricao: "", preco: 3, paes: null, encomenda: null, ativo: false, verificar: false, ordem: 8 },
       { id: "festa", categoria: "dogs", nome: "Cento de salgados", descricao: "", preco: 120, paes: null, encomenda: "Sob encomenda", ativo: true, verificar: false, ordem: 4 },
     ],
     config: [{ chave: "taxa_entrega", valor: 6 }],

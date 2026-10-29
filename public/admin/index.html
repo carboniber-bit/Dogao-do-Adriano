@@ -420,7 +420,7 @@ function cartaoPedido(p) {
   return `<article class="ped ${["pago", "a_combinar"].includes(p.status) ? "novo" : ""}">
     <div class="ped-h"><b>${esc(p.nome)} · ${brl(p.total)}</b><span class="st ${esc(p.status)}">${esc(STATUS[p.status] || p.status)}</span></div>
     <div class="meta"><span>${new Date(p.criado_em).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} · ${esc(p.ref)} · ${p.forma === "online" ? "pago online" + (p.mp_metodo ? " (" + esc(p.mp_metodo) + ")" : "") : "pagar na entrega/retirada"}</span></div>
-    <ul>${p.itens.map((i) => `<li>${num(i.q)}× ${esc(i.nome)}${i.pao ? ` (pão de ${esc(String(i.pao).toLowerCase())})` : ""}</li>`).join("")}</ul>
+    <ul>${p.itens.map((i) => `<li>${num(i.q)}× ${esc(i.nome)}${i.pao ? ` (pão de ${esc(String(i.pao).toLowerCase())})` : ""}${(i.adds || []).length ? `<br><small class="adds">+ ${i.adds.map((x) => esc(x.nome)).join(" + ")}</small>` : ""}</li>`).join("")}</ul>
     <div class="meta"><span><b>${esc(p.tipo)}</b>${p.endereco ? " · " + esc(p.endereco) : ""}</span>${p.obs ? `<span>Obs.: ${esc(p.obs)}</span>` : ""}
       <span>Tel.: <a href="https://wa.me/${esc(zapTel(tel))}" target="_blank" rel="noopener">${esc(p.telefone)}</a>${p.taxa > 0 ? ` · taxa de entrega ${brl(p.taxa)}` : ""}</span></div>
     <div class="acts">${["em_preparo", "pronto"].includes(p.status) ? `<a class="btn ghost sm avisar" href="https://wa.me/${esc(zapTel(tel))}?text=${encodeURIComponent(msgCliente(p))}" target="_blank" rel="noopener">📲 Avisar o cliente</a>` : ""}${prox ? `<button class="btn sm" data-id="${esc(p.id)}" data-s="${prox[0]}">${prox[1]}</button>` : ""}
@@ -485,7 +485,7 @@ async function carregarItens() {
   $("nCat").innerHTML = j.categorias.map((c) => `<option value="${esc(c.id)}">${esc(c.nome)}</option>`).join("");
   $("listaItens").innerHTML = j.categorias.map((c) => {
     const its = j.itens.filter((i) => i.cat === c.id);
-    return its.length ? `<div class="cat-t">${esc(c.nome)}</div>` + its.map((i) => `
+    return its.length ? `<div class="cat-t">${esc(c.nome)}${c.id === "adicionais" ? ' <small style="font-weight:400;color:var(--ink2)">— aparecem dentro de cada lanche (não são vendidos avulsos); bebidas não têm adicionais</small>' : ""}</div>` + its.map((i) => `
       <div class="it ${i.ativo ? "" : "off"}" data-id="${esc(i.id)}">
         <div><div class="nm">${esc(i.nome)}</div>${i.verificar ? '<span class="warn">⚠ Confira este preço (veio de foto antiga do cardápio)</span>' : ""}</div>
         <div class="ctl">

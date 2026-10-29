@@ -42,6 +42,7 @@ A conta Mercado Pago de quem recebe precisa ter **uma chave Pix cadastrada**: ap
 ## O que o painel faz
 - **Resumo:** faturamento, pedidos, ticket médio, itens mais pedidos, pedidos por horário e por dia (hoje, 7, 30 ou 90 dias, com comparação com o período anterior).
 - **Pedidos:** lista com dados do cliente, itens e endereço; botões de "iniciar preparo", "pronto", "entregue" e "cancelar".
+- **Adicionais:** os itens da categoria *Adicionais* (Bacon, Purê...) não são vendidos avulsos: o cliente os escolhe numa janela ao adicionar um lanche (bebidas e encomendas não têm). Preço e disponibilidade seguem o que está em Cardápio e preços; o servidor recalcula o valor de cada linha.
 - **Alerta de pedido novo:** banner, título da aba piscando e som opcional (botão "Som", é preciso clicar uma vez na página para o navegador liberar o áudio). Confere a cada 15 s.
 - **Avisar o cliente:** pedidos "em preparo" e "pronto" têm o botão "Avisar o cliente", que abre o WhatsApp com a mensagem pronta (sem custo de API).
 - **Cardápio e preços:** altera preço, tira/volta item do cardápio ("acabou o kibe"), cria item novo e define a taxa de entrega (única ou por bairro: uma linha `Nome; valor` por bairro; quem escolhe "Outro bairro" paga a taxa única). A mudança vale na hora no site e na cobrança.
@@ -69,6 +70,9 @@ Detalhes:
 
 ### Testes automáticos
 `node tests/api.test.js` roda a API com um Supabase e um Mercado Pago simulados (sem rede e sem dependências). `node tests/browser.test.js` abre o site num navegador (Playwright) com os mesmos simulados.
+
+## Privacidade (LGPD)
+`public/privacidade.html` é uma política de privacidade modelo, com links no rodapé e no carrinho. Revise e complete (razão social/CNPJ do responsável) antes de divulgar; se o Dogão do Adriano mudar de ferramenta (pagamento, banco, aviso), atualize a tabela de compartilhamento.
 
 ## Como a segurança funciona
 - O navegador nunca acessa as tabelas: elas têm RLS ligado e sem permissões. Só as funções em `api/` (com a chave secreta) leem e gravam.

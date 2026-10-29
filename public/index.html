@@ -123,6 +123,15 @@ input,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px sol
 .sec{width:100%;background:transparent;color:var(--ink);border-color:var(--line)}
 .sec:hover:not(:disabled){border-color:var(--red)}
 .pay:disabled,.wa:disabled,.sec:disabled{opacity:.45;cursor:not-allowed}
+.add-lista{border:0;padding:0;display:grid;gap:8px;margin:0 0 12px}
+.add-op{display:flex;align-items:center;gap:12px;border:2px solid var(--line);border-radius:12px;padding:10px 12px;min-height:48px;cursor:pointer;font-weight:500;background:var(--bg)}
+.add-op input{width:22px;height:22px;min-height:0;flex:none;accent-color:var(--red)}
+.add-op span{flex:1}
+.add-op b{color:var(--red);white-space:nowrap}
+@media(prefers-color-scheme:dark){.add-op b{color:var(--mustard)}}
+.add-op:has(input:checked){border-color:var(--red)}
+#dlgAdd:focus{outline:none}
+.line .ads{display:block;color:var(--muted);font-size:.85rem}
 .pix-valor{font:400 2.2rem var(--display);color:var(--red);margin:0 0 10px!important;letter-spacing:.02em}
 @media(prefers-color-scheme:dark){.pix-valor{color:var(--mustard)}}
 .pix-qr{display:block;margin:0 auto 14px;width:220px;height:220px;max-width:100%;background:#fff;padding:10px;border-radius:12px;border:1px solid var(--line);image-rendering:pixelated}
@@ -236,7 +245,7 @@ dialog.larga{max-width:520px}
 </main>
 
 <footer><div class="wrap">
-  <p>© Dogão do Adriano · R. Vicente Celestino, 108 – Santo Antônio, Osasco/SP</p>
+  <p>© Dogão do Adriano · R. Vicente Celestino, 108 – Santo Antônio, Osasco/SP · <a href="/privacidade.html">Política de Privacidade</a></p>
 </div></footer>
 
 <div class="overlay" id="overlay"></div>
@@ -267,7 +276,7 @@ dialog.larga{max-width:520px}
     <button class="btn pay" id="pix" disabled>Pagar com Pix</button>
     <button class="btn sec" id="pagar" disabled>Pagar com cartão (Mercado Pago)</button>
     <button class="btn wa" id="zap" disabled>Pedir no WhatsApp e pagar na entrega</button>
-    <p class="fine">Pix e cartão processados pelo Mercado Pago. Seus dados de cartão não passam por aqui.</p>
+    <p class="fine">Pix e cartão processados pelo Mercado Pago. Seus dados de cartão não passam por aqui. Ao pedir, você aceita a <a href="/privacidade.html" target="_blank" rel="noopener">Política de Privacidade</a>.</p>
   </div>
 </aside>
 
@@ -319,6 +328,14 @@ dialog.larga{max-width:520px}
   <button class="btn btn-y" id="resFechar">Fechar</button>
 </dialog>
 
+<dialog id="dlgAdd" tabindex="-1" aria-labelledby="addTit">
+  <h2 id="addTit">Seu lanche</h2>
+  <p id="addSub">Quer adicionar algo ao seu lanche?</p>
+  <fieldset class="add-lista" id="addLista"><legend class="sr">Adicionais</legend></fieldset>
+  <button class="btn pay" type="button" id="addOk">Adicionar ao pedido</button>
+  <button class="btn btn-y" type="button" id="addCancela">Cancelar</button>
+</dialog>
+
 <dialog id="dlgPix" tabindex="-1" aria-labelledby="pixTit">
   <h2 id="pixTit">Pague com Pix</h2>
   <p class="pix-valor" id="pixValor"></p>
@@ -347,7 +364,7 @@ const store = {
 
 let MENU = null, porId = new Map(), tab = null;
 let horario = null; // resposta de /api/status
-const cart = new Map(); // chave "id|pao" -> {id, pao, q}
+const cart = new Map(); // chave "id|pao|adicionais" -> {id, pao, adds:[ids], q}
 
 /* ---------- cardápio ---------- */
 async function carregarMenu() {
@@ -357,14 +374,19 @@ async function carregarMenu() {
     MENU = await r.json();
     MENU.itens.forEach((i) => porId.set(i.id, i));
     montarBairros();
-    tab = MENU.categorias[0].id;
+    tab = categoriasVisiveis()[0].id;
     renderTabs(); renderGrid(); restaurarCarrinho(); renderCart();
   } catch (e) {
     $("menuErr").hidden = false;
   }
 }
+// Adicionais não aparecem como itens avulsos: só dentro do lanche (janela "Quer adicionar algo?")
+const CAT_ADIC = "adicionais", SEM_ADIC = [CAT_ADIC, "bebidas"];
+const adicionaisAtivos = () => MENU.itens.filter((i) => i.cat === CAT_ADIC && !i.encomenda);
+const aceitaAdicional = (m) => !SEM_ADIC.includes(m.cat) && !m.encomenda && adicionaisAtivos().length > 0;
+const categoriasVisiveis = () => MENU.categorias.filter((c) => c.id !== CAT_ADIC);
 function renderTabs() {
-  $("tabs").innerHTML = MENU.categorias.map((c) =>
+  $("tabs").innerHTML = categoriasVisiveis().map((c) =>
     `<button class="tab" role="tab" aria-selected="${c.id === tab}" data-c="${c.id}">${esc(c.nome)}</button>`).join("");
   $("tabs").querySelectorAll(".tab").forEach((b) => b.onclick = () => { tab = b.dataset.c; renderTabs(); renderGrid(); });
 }
@@ -382,9 +404,10 @@ function renderGrid() {
     </article>`;
   }).join("");
   $("grid").querySelectorAll("[data-add]").forEach((b) => b.onclick = () => {
-    const id = b.dataset.add, sel = $("grid").querySelector(`[data-pao="${id}"]`);
-    mudar(id, sel ? sel.value : "", 1);
-    b.textContent = "✓ Adicionado"; setTimeout(() => b.textContent = "+ Adicionar", 900);
+    const id = b.dataset.add, sel = $("grid").querySelector(`[data-pao="${id}"]`), pao = sel ? sel.value : "";
+    const feito = () => { b.textContent = "✓ Adicionado"; setTimeout(() => b.textContent = "+ Adicionar", 900); };
+    if (aceitaAdicional(porId.get(id))) abrirAdicionais(id, pao, feito);
+    else { mudar(id, pao, [], 1); feito(); }
   });
   $("grid").querySelectorAll("[data-enc]").forEach((b) => b.onclick = () => {
     const m = porId.get(b.dataset.enc);
@@ -393,17 +416,48 @@ function renderGrid() {
   });
 }
 
+/* ---------- adicionais dentro do lanche ---------- */
+let addEstado = null; // {id, pao, feito}
+function totalAdd() {
+  const m = porId.get(addEstado.id);
+  return m.preco + [...$("addLista").querySelectorAll("input:checked")].reduce((s, i) => s + porId.get(i.value).preco, 0);
+}
+function abrirAdicionais(id, pao, feito) {
+  const m = porId.get(id); addEstado = { id, pao, feito };
+  $("addTit").textContent = m.nome + (pao ? ` (pão de ${pao.toLowerCase()})` : "");
+  $("addLista").innerHTML = '<legend class="sr">Adicionais</legend>' + adicionaisAtivos().map((a) =>
+    `<label class="add-op"><input type="checkbox" value="${esc(a.id)}"><span>${esc(a.nome)}</span><b>+ ${brl(a.preco)}</b></label>`).join("");
+  const atualizar = () => { $("addOk").textContent = `Adicionar ao pedido · ${brl(totalAdd())}`; };
+  $("addLista").querySelectorAll("input").forEach((i) => i.onchange = atualizar); atualizar();
+  $("dlgAdd").showModal(); $("dlgAdd").focus();
+}
+$("addOk").onclick = () => {
+  const adds = [...$("addLista").querySelectorAll("input:checked")].map((i) => i.value);
+  const { id, pao, feito } = addEstado; $("dlgAdd").close();
+  mudar(id, pao, adds, 1); feito();
+};
+$("addCancela").onclick = () => $("dlgAdd").close();
+
 /* ---------- carrinho ---------- */
-const chave = (id, pao) => `${id}|${pao || ""}`;
-function mudar(id, pao, d) {
-  const k = chave(id, pao), atual = cart.get(k) || { id, pao, q: 0 };
+const chave = (id, pao, adds) => `${id}|${pao || ""}|${[...(adds || [])].sort().join("+")}`;
+const precoUnit = (l) => porId.get(l.id).preco + (l.adds || []).reduce((s, a) => s + porId.get(a).preco, 0);
+const nomesAdds = (l) => (l.adds || []).map((a) => porId.get(a).nome);
+const itensPedido = () => [...cart.values()].map((l) => ({ id: l.id, pao: l.pao, q: l.q, adds: l.adds || [] }));
+function mudar(id, pao, adds, d) {
+  adds = [...new Set(adds || [])].sort();
+  const k = chave(id, pao, adds), atual = cart.get(k) || { id, pao, adds, q: 0 };
   atual.q += d;
   if (atual.q <= 0) cart.delete(k); else cart.set(k, atual);
   salvarCarrinho(); renderCart();
 }
 const salvarCarrinho = () => store.set("dogao_cart", [...cart.values()]);
 function restaurarCarrinho() {
-  (store.get("dogao_cart") || []).forEach((l) => { if (porId.has(l.id) && l.q > 0) cart.set(chave(l.id, l.pao), l); });
+  (store.get("dogao_cart") || []).forEach((l) => {
+    const m = porId.get(l.id);
+    if (!m || l.q <= 0 || m.cat === CAT_ADIC) return;           // item sumiu, ou é adicional avulso de uma versão antiga
+    const adds = SEM_ADIC.includes(m.cat) ? [] : [...new Set(l.adds || [])].filter((a) => porId.has(a) && porId.get(a).cat === CAT_ADIC).sort();
+    cart.set(chave(l.id, l.pao, adds), { id: l.id, pao: l.pao, adds, q: l.q });
+  });
 }
 const tipo = () => document.querySelector('input[name="tipo"]:checked').value;
 // taxa por bairro (se o painel tiver lista) ou única. O servidor recalcula; aqui é só para mostrar.
@@ -425,7 +479,7 @@ function montarBairros() {
 }
 function totais() {
   let n = 0, sub = 0;
-  cart.forEach((l) => { n += l.q; sub += l.q * porId.get(l.id).preco; });
+  cart.forEach((l) => { n += l.q; sub += l.q * precoUnit(l); });
   const taxa = n > 0 ? taxaEntrega() : 0;
   return { n, sub, taxa, total: sub + taxa };
 }
@@ -438,11 +492,11 @@ function renderCart() {
   $("sumTaxa").hidden = !(taxa > 0 || faltaBairro); $("taxa").textContent = faltaBairro ? "escolha o bairro" : brl(taxa);
   $("lines").innerHTML = n === 0
     ? `<p class="empty">Seu carrinho está vazio.<br>Escolha algo no cardápio 🌭</p>`
-    : [...cart].map(([k, l]) => { const m = porId.get(l.id);
-        return `<div class="line"><div><b>${esc(m.nome)}</b><small>${l.pao ? `Pão de ${esc(l.pao.toLowerCase())} · ` : ""}${brl(m.preco)} cada</small>
+    : [...cart].map(([k, l]) => { const m = porId.get(l.id), ads = nomesAdds(l);
+        return `<div class="line"><div><b>${esc(m.nome)}</b>${ads.length ? `<small class="ads">+ ${ads.map(esc).join(" + ")}</small>` : ""}<small>${l.pao ? `Pão de ${esc(l.pao.toLowerCase())} · ` : ""}${brl(precoUnit(l))} cada</small>
         <div class="qty"><button data-k="${esc(k)}" data-d="-1" aria-label="Diminuir quantidade">−</button><span aria-live="polite">${l.q}</span><button data-k="${esc(k)}" data-d="1" aria-label="Aumentar quantidade">+</button></div></div>
-        <b>${brl(l.q * m.preco)}</b></div>`; }).join("");
-  $("lines").querySelectorAll(".qty button").forEach((b) => b.onclick = () => { const l = cart.get(b.dataset.k); mudar(l.id, l.pao, +b.dataset.d); });
+        <b>${brl(l.q * precoUnit(l))}</b></div>`; }).join("");
+  $("lines").querySelectorAll(".qty button").forEach((b) => b.onclick = () => { const l = cart.get(b.dataset.k); mudar(l.id, l.pao, l.adds, +b.dataset.d); });
   $("endWrap").style.display = tipo() === "Delivery" ? "grid" : "none";
   $("bairroWrap").hidden = !precisaBairro();
   atualizarBotoes();
@@ -516,7 +570,7 @@ function mostrarErro(m) { $("erro").hidden = !m; $("erro").textContent = m; }
 function textoPedido(d, ref) {
   const { total } = totais();
   let t = ref ? `Pedido ${ref} (pago online)\n` : `Olá, Dogão do Adriano! Quero fazer um pedido:\n\n`;
-  cart.forEach((l) => { const m = porId.get(l.id); t += `• ${l.q}x ${m.nome}${l.pao ? ` (pão de ${l.pao.toLowerCase()})` : ""} — ${brl(l.q * m.preco)}\n`; });
+  cart.forEach((l) => { const m = porId.get(l.id), ads = nomesAdds(l); t += `• ${l.q}x ${m.nome}${l.pao ? ` (pão de ${l.pao.toLowerCase()})` : ""}${ads.map((a) => ` + ${a}`).join("")} — ${brl(l.q * precoUnit(l))}\n`; });
   t += `\nTotal: ${brl(total)}${ref ? "" : " (pagamento na entrega/retirada)"}\nTipo: ${d.tipo}\nNome: ${d.nome}\nTelefone: ${d.telefone}`;
   if (d.tipo === "Delivery") t += `\nEndereço: ${d.endereco}${d.bairro ? (d.bairro === "__outro" ? " (outro bairro)" : ` (bairro: ${d.bairro})`) : ""}`;
   if (d.obs) t += `\nObs.: ${d.obs}`;
@@ -528,7 +582,7 @@ $("zap").onclick = async () => {
   let ref = "";
   try {
     const r = await auth.fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...d, email: undefined, modo: "whatsapp", itens: [...cart.values()].map((l) => ({ id: l.id, pao: l.pao, q: l.q })) }) });
+      body: JSON.stringify({ ...d, email: undefined, modo: "whatsapp", itens: itensPedido() }) });
     const j = await r.json().catch(() => ({}));
     if (r.ok && j.ref) ref = j.ref; else if (r.status === 400) { if (w) w.close(); return mostrarErro(j.erro || "Confira o pedido."); }
   } catch { /* se o registro falhar, o pedido ainda segue pelo WhatsApp */ }
@@ -543,7 +597,7 @@ $("pagar").onclick = async () => {
   try {
     const r = await auth.fetch("/api/checkout", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...d, email: undefined, itens: [...cart.values()].map((l) => ({ id: l.id, pao: l.pao, q: l.q })) }),
+      body: JSON.stringify({ ...d, email: undefined, itens: itensPedido() }),
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || !j.url) throw new Error(j.erro || "Não foi possível iniciar o pagamento.");
@@ -629,7 +683,7 @@ async function gerarPix() {
   try {
     const r = await auth.fetch("/api/checkout", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...d, modo: "pix", itens: [...cart.values()].map((l) => ({ id: l.id, pao: l.pao, q: l.q })) }),
+      body: JSON.stringify({ ...d, modo: "pix", itens: itensPedido() }),
     });
     const j = await r.json().catch(() => ({}));
     if (!r.ok || !j.pix) throw new Error(j.erro || "Não foi possível gerar o Pix. Tente de novo.");
@@ -740,7 +794,7 @@ $("formSenha").onsubmit = async (e) => {
   try { await auth.novaSenha($("nsSenha").value); $("nsSenha").value = ""; $("dlgSenha").close(); await atualizarConta(); } catch (err) { $("nsMsg").textContent = err.message; }
 };
 
-function resumoItens(itens) { return itens.map((i) => `${i.q}x ${esc(i.nome)}${i.pao ? ` (${esc(i.pao.toLowerCase())})` : ""}`).join(", "); }
+function resumoItens(itens) { return itens.map((i) => `${i.q}x ${esc(i.nome)}${i.pao ? ` (${esc(i.pao.toLowerCase())})` : ""}${(i.adds || []).map((a) => ` + ${esc(a.nome)}`).join("")}`).join(", "); }
 function renderPedidos(lista) {
   $("cPedidos").innerHTML = !lista.length ? '<p class="empty" style="padding:14px">Você ainda não fez pedidos logado.</p>' : lista.map((p, n) => `
     <div class="ped"><b>${new Date(p.criado_em).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })} · ${brl(Number(p.total))}</b>
@@ -748,7 +802,13 @@ function renderPedidos(lista) {
     <div>${resumoItens(p.itens)}</div><button class="mini" data-repetir="${n}">Pedir de novo</button></div>`).join("");
   $("cPedidos").querySelectorAll("[data-repetir]").forEach((b) => b.onclick = () => {
     let add = 0;
-    lista[+b.dataset.repetir].itens.forEach((i) => { const m = porId.get(i.id); if (m && !m.encomenda) { mudar(i.id, i.pao && m.paes && m.paes.includes(i.pao) ? i.pao : (m.paes ? m.paes[0] : ""), i.q); add++; } });
+    lista[+b.dataset.repetir].itens.forEach((i) => {
+      const m = porId.get(i.id);
+      if (m && !m.encomenda && m.cat !== CAT_ADIC) {
+        const adds = SEM_ADIC.includes(m.cat) ? [] : (i.adds || []).map((a) => a.id).filter((a) => porId.has(a) && porId.get(a).cat === CAT_ADIC); // adicional que acabou fica de fora
+        mudar(i.id, i.pao && m.paes && m.paes.includes(i.pao) ? i.pao : (m.paes ? m.paes[0] : ""), adds, i.q); add++;
+      }
+    });
     $("dlgConta").close(); if (add) gaveta(true);
   });
 }

@@ -50,7 +50,8 @@ async function novaPagina(browser, base, opts = {}) {
 }
 const montarPedido = async (page, { email = "maria@exemplo.com" } = {}) => {
   await page.goto("/"); await page.locator("[data-add]").first().waitFor();
-  await page.locator("[data-add]").first().click(); // Dogão Tradicional (R$ 18)
+  await page.locator("[data-add]").first().click(); // Dogão Tradicional (R$ 18); abre a janela de adicionais
+  await page.locator("#dlgAdd[open]").waitFor(); await page.click("#addOk");   // sem adicionais
   await page.click("#openCart");
   await page.fill("#nome", "Maria da Silva"); await page.fill("#tel", "11999991234"); await page.fill("#end", "Rua das Flores, 123");
   if (email !== null) await page.fill("#email", email);
@@ -261,7 +262,7 @@ const semRolagemHorizontal = (page) => page.evaluate((w) => document.documentEle
     await I.page.goto("/"); await I.page.locator("[data-add]").first().waitFor();
     await I.page.click("#openConta"); await I.page.fill("#lgEmail", "cliente@teste.com"); await I.page.fill("#lgSenha", "senha12345");
     await I.page.click("#lgOk"); await I.page.waitForFunction(() => /Cliente/.test(document.getElementById("openConta").textContent));
-    await I.page.click("[data-add]"); await I.page.click("#openCart");
+    await I.page.click("[data-add]"); await I.page.locator("#dlgAdd[open]").waitFor(); await I.page.click("#addOk"); await I.page.click("#openCart");
     assert.equal(await I.page.inputValue("#email"), "cliente@teste.com");
     assert.equal(await I.page.inputValue("#nome"), "Cliente Logado");
     await I.page.keyboard.press("Escape"); await I.page.click("#openConta");
@@ -411,6 +412,156 @@ const semRolagemHorizontal = (page) => page.evaluate((w) => document.documentEle
     assert.deepEqual(N.erros, []);
   });
   await N.ctx.close();
+
+  const P = await mk();
+  await passo("privacidade: página abre, links no rodapé e no carrinho, sem rolagem horizontal (claro e escuro)", async () => {
+    const r = await P.page.goto("/privacidade.html");
+    assert.equal(r.status(), 200);
+    assert.match(await P.page.title(), /Política de Privacidade/);
+    const txt = await P.page.innerText("main");
+    for (const t of ["LGPD", "Mercado Pago", "Supabase", "Vercel", "Telegram", "não guardamos o seu e-mail do Pix", "Seus direitos", "(11) 99017-3256"]) assert.ok(txt.toLowerCase().includes(t.toLowerCase()), "falta: " + t);
+    assert.ok(await semRolagemHorizontal(P.page), "rolagem horizontal na página de privacidade");
+    await P.page.goto("/");
+    assert.equal(await P.page.getAttribute('footer a[href="/privacidade.html"]', "href"), "/privacidade.html");
+    await P.page.click("#openCart");
+    assert.equal(await P.page.locator('.d-foot .fine a[href="/privacidade.html"]').count(), 1);
+    assert.match(await P.page.innerText(".fine"), /Pix e cartão processados pelo Mercado Pago/);
+    assert.deepEqual(P.erros, []);
+  });
+  await P.ctx.close();
+  const Q = await mk({ colorScheme: "dark" });
+  await passo("privacidade: modo escuro legível e sem rolagem horizontal em 390 px", async () => {
+    await Q.page.goto("/privacidade.html");
+    const cores = await Q.page.evaluate(() => ({ bg: getComputedStyle(document.body).backgroundColor, tx: getComputedStyle(document.body).color }));
+    const lum = (rgb) => { const [r, g, b] = rgb.match(/\d+/g).map(Number); return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255; };
+    assert.ok(lum(cores.bg) < 0.25 && lum(cores.tx) > 0.7, JSON.stringify(cores));
+    assert.ok(await semRolagemHorizontal(Q.page));
+    if (FOTOS) await Q.page.screenshot({ path: FOTOS + "/6-privacidade-390-escuro.png", fullPage: false });
+  });
+  await Q.ctx.close();
+
+  const R = await mk();
+  await passo("adicionais: não aparecem como aba nem avulsos; janela 'Quer adicionar algo?' dentro do lanche", async () => {
+    await R.page.goto("/"); await R.page.locator("[data-add]").first().waitFor();
+    const abas = await R.page.locator("#tabs .tab").allInnerTexts();
+    assert.deepEqual(abas, ["Dogões", "Bebidas"]);                   // sem "Adicionais"
+    assert.equal(await R.page.locator('[data-add="bacon"]').count(), 0);
+    // cancelar não adiciona
+    await R.page.locator('[data-add="tradicional"]').click();
+    await R.page.locator("#dlgAdd[open]").waitFor();
+    assert.equal(await R.page.innerText("#addTit"), "Dogão Tradicional (pão de banha)");
+    assert.match(await R.page.innerText("#addSub"), /Quer adicionar algo/);
+    const ops = (await R.page.locator("#addLista .add-op").allInnerTexts()).map((t) => t.replace(/\s+/g, " ").replace(/\u00a0/g, " ").trim());
+    assert.deepEqual(ops, ["Bacon + R$ 6,00", "Purê + R$ 6,00", "Queijo ralado + R$ 2,00"]);   // sem o desativado
+    for (const op of await R.page.locator("#addLista .add-op").all()) assert.ok((await op.boundingBox()).height >= 44);
+    assert.ok(await semRolagemHorizontal(R.page));
+    assert.equal(await R.page.evaluate(() => document.activeElement.id), "dlgAdd");
+    if (FOTOS) await R.page.screenshot({ path: FOTOS + "/7-adicionais-390.png" });
+    await R.page.click("#addCancela");
+    assert.equal(await R.page.innerText("#count"), "0");
+    // preço do botão acompanha a escolha
+    const btn = async () => (await R.page.innerText("#addOk")).replace(/\u00a0/g, " ");
+    await R.page.selectOption('[data-pao="tradicional"]', "Sal");
+    await R.page.locator('[data-add="tradicional"]').click(); await R.page.locator("#dlgAdd[open]").waitFor();
+    assert.equal(await R.page.innerText("#addTit"), "Dogão Tradicional (pão de sal)");
+    assert.equal(await btn(), "Adicionar ao pedido · R$ 18,00");
+    await R.page.check('#addLista input[value="bacon"]'); assert.equal(await btn(), "Adicionar ao pedido · R$ 24,00");
+    await R.page.check('#addLista input[value="queijo"]'); assert.equal(await btn(), "Adicionar ao pedido · R$ 26,00");
+    await R.page.uncheck('#addLista input[value="queijo"]'); assert.equal(await btn(), "Adicionar ao pedido · R$ 24,00");
+    await R.page.check('#addLista input[value="queijo"]');
+    await R.page.click("#addOk");
+    assert.equal(await R.page.innerText("#count"), "1");
+    // outro dogão igual sem adicionais vira OUTRA linha; mesmo dogão com os mesmos adicionais soma na mesma linha
+    await R.page.locator('[data-add="tradicional"]').click(); await R.page.locator("#dlgAdd[open]").waitFor(); await R.page.click("#addOk");
+    await R.page.locator('[data-add="tradicional"]').click(); await R.page.locator("#dlgAdd[open]").waitFor();
+    await R.page.check('#addLista input[value="queijo"]'); await R.page.check('#addLista input[value="bacon"]'); await R.page.click("#addOk");
+    assert.equal(await R.page.innerText("#count"), "3");
+    // bebida: adiciona direto, sem janela
+    await R.page.click('#tabs .tab:has-text("Bebidas")');
+    await R.page.locator('[data-add="agua"]').click();
+    assert.equal(await R.page.locator("#dlgAdd").evaluate((d) => d.open), false);
+    await R.page.click("#openCart");
+    const linhas = (await R.page.locator("#lines .line").allInnerTexts()).map((t) => t.replace(/\s+/g, " ").replace(/\u00a0/g, " "));
+    assert.equal(linhas.length, 3, linhas.join(" | "));
+    assert.match(linhas[0], /Dogão Tradicional \+ Bacon \+ Queijo ralado Pão de sal · R\$ 26,00 cada.*2.*R\$ 52,00/);
+    assert.match(linhas[1], /Dogão Tradicional Pão de sal · R\$ 18,00 cada.*1.*R\$ 18,00/);
+    assert.match(linhas[2], /Água/);
+    await R.page.selectOption("#bairro", "Centro");                                          // (bairros cadastrados no teste anterior; taxa 6)
+    assert.match((await R.page.innerText("#total")).replace(/\u00a0/g, " "), /R\$ 81,00/);   // 52 + 18 + 5 + taxa 6
+    assert.ok(await semRolagemHorizontal(R.page));
+    // aumentar a quantidade mantém os adicionais
+    await R.page.locator('#lines .line:nth-child(2) .qty button[data-d="1"]').click();
+    assert.match((await R.page.innerText("#lines .line:nth-child(2)")).replace(/\s+/g, " "), /Dogão Tradicional.*Pão de sal.*2/);
+    await R.page.locator('#lines .line:nth-child(2) .qty button[data-d="-1"]').click();
+    // vai para o Pix: servidor recalcula e grava o snapshot com adicionais
+    await R.page.fill("#nome", "Maria da Silva"); await R.page.fill("#tel", "11999991234"); await R.page.fill("#end", "Rua das Flores, 123");
+    await R.page.fill("#email", "maria@exemplo.com");
+    await R.page.click('label:has(input[value="Retirada"]) span');
+    assert.match((await R.page.innerText("#total")).replace(/\u00a0/g, " "), /R\$ 75,00/);
+    await R.page.click("#pix"); await R.page.locator("#dlgPix[open]").waitFor();
+    assert.match((await R.page.innerText("#pixValor")).replace(/\u00a0/g, " "), /R\$ 75,00/);
+    const ped = est.tabelas.pedidos.at(-1);
+    assert.equal(ped.total, 75);
+    assert.deepEqual(ped.itens.map((i) => [i.id, i.pao, i.q, i.preco, i.adds.map((a) => a.id).sort()]),
+      [["tradicional", "Sal", 2, 26, ["bacon", "queijo"]], ["tradicional", "Sal", 1, 18, []], ["agua", "", 1, 5, []]]);
+    assert.deepEqual(R.erros, []);
+  });
+  await R.ctx.close();
+  const T = await mk();
+  await passo("adicionais: carrinho antigo (adicional avulso) é limpo; carrinho com adicionais sobrevive ao recarregar", async () => {
+    await T.ctx.addInitScript(() => { if (!sessionStorage.getItem("semeado")) { sessionStorage.setItem("semeado", "1"); localStorage.setItem("dogao_cart", JSON.stringify([{ id: "bacon", pao: "", q: 2 }, { id: "agua", pao: "", q: 1 }, { id: "tradicional", pao: "Banha", q: 1, adds: ["pure", "esgotado", "agua", "tradicional"] }])); } });
+    await T.page.goto("/"); await T.page.locator("[data-add]").first().waitFor();
+    await T.page.click("#openCart");
+    const linhas = (await T.page.locator("#lines .line").allInnerTexts()).map((t) => t.replace(/\s+/g, " "));
+    assert.equal(linhas.length, 2, linhas.join("|"));
+    assert.match(linhas.join("|"), /Água/); assert.match(linhas.join("|"), /Dogão Tradicional \+ Purê/);
+    assert.doesNotMatch(linhas.join("|"), /Bacon|Ovo/);                 // adicional avulso e adicional desativado saem
+    await T.page.reload(); await T.page.locator("[data-add]").first().waitFor(); await T.page.click("#openCart");
+    assert.equal(await T.page.locator("#lines .line").count(), 2);
+    assert.deepEqual(T.erros, []);
+  });
+  await T.ctx.close();
+  const U = await mk({ colorScheme: "dark" });
+  await passo("adicionais: modo escuro legível; 'Pedir de novo' leva os adicionais (e ignora os que acabaram)", async () => {
+    est.tabelas.pedidos.push({ id: "00000000-0000-4000-8000-0000000000aa", ref: "DAREPETE1", user_id: "u-cliente", nome: "Cliente Logado", telefone: "11999990000", tipo: "Retirada", endereco: null, obs: null,
+      itens: [{ id: "tradicional", nome: "Dogão Tradicional", pao: "Sal", q: 2, preco: 29, base: 18, adds: [{ id: "bacon", nome: "Bacon", preco: 6 }, { id: "esgotado", nome: "Ovo", preco: 3 }] }],
+      subtotal: 58, taxa: 0, total: 58, forma: "online", status: "pago", criado_em: new Date().toISOString() });
+    await U.page.goto("/"); await U.page.locator("[data-add]").first().waitFor();
+    await U.page.locator('[data-add="tradicional"]').click(); await U.page.locator("#dlgAdd[open]").waitFor();
+    const cores = await U.page.evaluate(() => { const c = (s, p) => getComputedStyle(document.querySelector(s))[p]; return { dlg: c("#dlgAdd", "backgroundColor"), txt: c("#dlgAdd", "color"), op: c(".add-op", "backgroundColor") }; });
+    const lum = (rgb) => { const [r, g, b] = rgb.match(/\d+/g).map(Number); return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255; };
+    assert.ok(lum(cores.dlg) < 0.25 && lum(cores.txt) > 0.7 && lum(cores.op) < 0.25, JSON.stringify(cores));
+    if (FOTOS) await U.page.screenshot({ path: FOTOS + "/8-adicionais-390-escuro.png" });
+    await U.page.click("#addCancela");
+    await U.page.click("#openConta"); await U.page.fill("#lgEmail", "cliente@teste.com"); await U.page.fill("#lgSenha", "senha12345"); await U.page.click("#lgOk");
+    await U.page.waitForFunction(() => /Cliente/.test(document.getElementById("openConta").textContent));
+    await U.page.click("#openConta"); await U.page.locator("#dlgConta[open]").waitFor();
+    assert.match(await U.page.innerText("#cPedidos"), /2x Dogão Tradicional \(sal\) \+ Bacon \+ Ovo/);
+    await U.page.click("[data-repetir]");
+    await U.page.locator("#drawer.on").waitFor();
+    const l = (await U.page.innerText("#lines .line")).replace(/\s+/g, " ").replace(/\u00a0/g, " ");
+    assert.match(l, /Dogão Tradicional \+ Bacon Pão de sal · R\$ 24,00 cada.*2/);
+    assert.doesNotMatch(l, /Ovo/);
+    assert.deepEqual(U.erros, []);
+  });
+  await U.ctx.close();
+
+  const V = await mk();
+  await passo("painel: pedido mostra os adicionais do lanche (texto escapado) e o cardápio explica os adicionais", async () => {
+    est.tabelas.pedidos.push({ id: "00000000-0000-4000-8000-0000000000bb", ref: "DAADIC001", user_id: null, nome: "Marcos", telefone: "11999990000", tipo: "Retirada", endereco: null, obs: null,
+      itens: [{ id: "tradicional", nome: "Dogão Tradicional", pao: "Sal", q: 2, preco: 26, base: 18, adds: [{ id: "bacon", nome: "Bacon", preco: 6 }, { id: "queijo", nome: "Queijo <img src=x onerror=window.__x=1>", preco: 2 }] }],
+      subtotal: 52, taxa: 0, total: 52, forma: "online", status: "pago", criado_em: new Date().toISOString() });
+    await V.ctx.addInitScript(() => localStorage.setItem("dogao_auth", JSON.stringify({ access_token: "tok-admin", refresh_token: "r", exp: Date.now() + 3600e3, email: "admin@teste.com" })));
+    await V.page.goto("/admin/#pedidos");
+    await V.page.waitForFunction(() => /DAADIC001/.test(document.getElementById("listaPedidos").innerText));
+    const card = (await V.page.locator('article.ped:has-text("DAADIC001")').innerText()).replace(/\s+/g, " ");
+    assert.match(card, /2× Dogão Tradicional \(pão de sal\) \+ Bacon \+ Queijo <img src=x onerror=window.__x=1>/);
+    assert.equal(await V.page.evaluate(() => window.__x), undefined);
+    await V.page.click('[data-t="cardapio"]');
+    await V.page.waitForFunction(() => /aparecem dentro de cada lanche/.test(document.getElementById("listaItens").innerText));
+    assert.deepEqual(V.erros, []);
+  });
+  await V.ctx.close();
 
   await browser.close(); servidor.close();
   console.log(`\n${ok} verificações passaram${process.exitCode ? ", HÁ FALHAS" : ""}.`);

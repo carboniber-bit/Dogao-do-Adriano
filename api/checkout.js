@@ -92,20 +92,31 @@ module.exports = async (req, res) => {
   try { menu = await carregarMenu(); } catch (e) { console.error("menu:", e.message); return res.status(500).json({ erro: "Cardápio indisponível. Tente de novo." }); }
   const porId = new Map(menu.itens.map((i) => [i.id, i]));
 
+  // Adicionais (categoria "adicionais") só existem DENTRO de um lanche: it.adds = [ids], cada um no máximo 1x por lanche.
+  // Bebidas e itens de encomenda não aceitam adicionais. O preço de cada linha é recalculado aqui.
+  const CAT_ADIC = "adicionais", SEM_ADIC = new Set([CAT_ADIC, "bebidas"]);
+  const indisponivel = () => res.status(400).json({ erro: "Um item do carrinho não está mais disponível. Atualize a página." });
   const snapshot = [], items = [], linhas = [];
   let subtotal = 0;
   for (const it of b.itens) {
     const prod = porId.get(String(it.id));
     const q = Number(it.q);
-    if (!prod || prod.encomenda || !Number.isInteger(q) || q < 1 || q > 20) {
-      return res.status(400).json({ erro: "Um item do carrinho não está mais disponível. Atualize a página." });
+    if (!prod || prod.encomenda || prod.cat === CAT_ADIC || !Number.isInteger(q) || q < 1 || q > 20) return indisponivel();
+    if (it.adds !== undefined && !Array.isArray(it.adds)) return indisponivel();
+    const idsAdd = (it.adds || []).map(String);
+    let adds = [];
+    if (idsAdd.length) {
+      if (SEM_ADIC.has(prod.cat) || idsAdd.length > 8 || new Set(idsAdd).size !== idsAdd.length) return indisponivel();
+      adds = idsAdd.map((id) => porId.get(id));
+      if (adds.some((a) => !a || a.cat !== CAT_ADIC || a.encomenda)) return indisponivel();
     }
     const pao = prod.paes ? (prod.paes.includes(it.pao) ? it.pao : prod.paes[0]) : "";
-    const titulo = pao ? `${prod.nome} (pão de ${pao.toLowerCase()})` : prod.nome;
-    items.push({ id: prod.id, title: titulo, quantity: q, unit_price: prod.preco, currency_id: "BRL" });
-    snapshot.push({ id: prod.id, nome: prod.nome, pao, q, preco: prod.preco });
+    const titulo = (pao ? `${prod.nome} (pão de ${pao.toLowerCase()})` : prod.nome) + adds.map((a) => ` + ${a.nome}`).join("");
+    const unit = arred(prod.preco + adds.reduce((s, a) => s + a.preco, 0));
+    items.push({ id: prod.id, title: titulo, quantity: q, unit_price: unit, currency_id: "BRL" });
+    snapshot.push({ id: prod.id, nome: prod.nome, pao, q, preco: unit, base: prod.preco, adds: adds.map((a) => ({ id: a.id, nome: a.nome, preco: a.preco })) });
     linhas.push(`${q}x ${titulo}`);
-    subtotal += q * prod.preco;
+    subtotal += q * unit;
   }
   subtotal = arred(subtotal);
   // taxa: por bairro (se o painel tiver lista de bairros) ou única; sempre calculada aqui, nunca vinda do navegador

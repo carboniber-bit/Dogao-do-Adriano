@@ -540,6 +540,71 @@ test("bairros: painel valida (estrito), grava, audita e vale na hora; exige admi
   assert.equal((await pedirPix({ bairro: undefined })).corpo.total, 16);
 });
 
+/* ===== Adicionais dentro do lanche ===== */
+test("adicionais: preço do lanche + adicionais calculado no servidor, em cada linha (Pix)", async () => {
+  const r = await pedirPix({ tipo: "Retirada", itens: [
+    { id: "tradicional", pao: "Sal", q: 2, adds: ["bacon", "queijo"], preco: 1, unit_price: 1 },   // 2 x (18 + 6 + 2) = 52
+    { id: "tradicional", pao: "Sal", q: 1 },                                                         // 18
+    { id: "agua", q: 1 }] });                                                                       // 5
+  assert.equal(r.status, 200);
+  assert.equal(r.corpo.total, 75);
+  const p = doDb(r.corpo.ref);
+  assert.deepEqual([p.subtotal, p.taxa, p.total], [75, 0, 75]);
+  assert.deepEqual(p.itens[0], { id: "tradicional", nome: "Dogão Tradicional", pao: "Sal", q: 2, preco: 26, base: 18,
+    adds: [{ id: "bacon", nome: "Bacon", preco: 6 }, { id: "queijo", nome: "Queijo ralado", preco: 2 }] });
+  assert.deepEqual(p.itens[1].adds, []);
+  const mp = est.mp.chamadasCriar[0].body;
+  assert.equal(mp.transaction_amount, 75);
+  assert.equal(mp.additional_info.items[0].title, "Dogão Tradicional (pão de sal) + Bacon + Queijo ralado");
+  assert.equal(mp.additional_info.items[0].unit_price, 26);
+  assert.match(mp.metadata.pedido, /2x Dogão Tradicional \(pão de sal\) \+ Bacon \+ Queijo ralado/);
+});
+
+test("adicionais: cartão e WhatsApp também montam a linha com adicionais (e o Telegram mostra)", async () => {
+  const c = await chamar(checkout, { method: "POST", body: base({ email: undefined, tipo: "Retirada", itens: [{ id: "tradicional", q: 1, adds: ["pure"] }] }) });
+  assert.equal(c.corpo.total, 24);
+  const it = est.mp.ultimaPreferencia.items[0];
+  assert.deepEqual([it.title, it.unit_price], ["Dogão Tradicional (pão de banha) + Purê", 24]);
+  const z = await chamar(checkout, { method: "POST", body: base({ modo: "whatsapp", email: undefined, tipo: "Retirada", itens: [{ id: "tradicional", pao: "Sal", q: 2, adds: ["bacon", "pure"] }] }) });
+  assert.equal(z.corpo.total, 60);
+  assert.match(est.telegram.at(-1), /2x Dogão Tradicional \(pão de sal\) \+ Bacon \+ Purê/);
+});
+
+test("adicionais: recusa adicional avulso, em bebida, repetido, inexistente, desativado, de lanche, lista inválida ou excesso", async () => {
+  const ruins = [
+    [{ id: "bacon", q: 1 }],                                          // adicional avulso
+    [{ id: "agua", q: 1, adds: ["bacon"] }],                          // bebida não aceita adicional
+    [{ id: "tradicional", q: 1, adds: ["bacon", "bacon"] }],          // repetido
+    [{ id: "tradicional", q: 1, adds: ["nao-existe"] }],              // inexistente
+    [{ id: "tradicional", q: 1, adds: ["esgotado"] }],                // desativado
+    [{ id: "tradicional", q: 1, adds: ["agua"] }],                    // não é adicional
+    [{ id: "tradicional", q: 1, adds: ["tradicional"] }],             // lanche como adicional
+    [{ id: "tradicional", q: 1, adds: "bacon" }],                     // formato errado
+    [{ id: "tradicional", q: 1, adds: [{ id: "bacon" }] }],           // formato errado
+    [{ id: "tradicional", q: 1, adds: Array.from({ length: 9 }, (_, i) => "x" + i) }],
+    [{ id: "festa", q: 1, adds: ["bacon"] }],                         // encomenda
+  ];
+  for (const itens of ruins) {
+    const r = await pedirPix({ itens });
+    assert.equal(r.status, 400, JSON.stringify(itens).slice(0, 80));
+    assert.equal(r.corpo.erro, "Um item do carrinho não está mais disponível. Atualize a página.");
+  }
+  assert.equal(est.tabelas.pedidos.length, 0);
+  assert.equal(est.mp.chamadasCriar.length, 0);
+});
+
+test("adicionais: lista vazia ou ausente é o lanche puro; /api/menu continua publicando os adicionais", async () => {
+  assert.equal((await pedirPix({ tipo: "Retirada", itens: [{ id: "tradicional", q: 1, adds: [] }] })).corpo.total, 18);
+  assert.equal((await pedirPix({ tipo: "Retirada", itens: [{ id: "tradicional", q: 1 }] })).corpo.total, 18);
+  const m = (await chamar(menu)).corpo;
+  assert.deepEqual(m.itens.filter((i) => i.cat === "adicionais").map((i) => i.id).sort(), ["bacon", "pure", "queijo"]); // sem o desativado
+});
+
+test("adicionais: preço do adicional vem do banco (mudou no painel, muda na cobrança)", async () => {
+  est.tabelas.itens.find((i) => i.id === "bacon").preco = 7.5;
+  assert.equal((await pedirPix({ tipo: "Retirada", itens: [{ id: "tradicional", q: 1, adds: ["bacon"] }] })).corpo.total, 25.5);
+});
+
 test("limites: no máximo 12 funções serverless (arquivos sem '_' em api/)", () => {
   const fs = require("fs"), path = require("path");
   const fns = fs.readdirSync(path.join(__dirname, "..", "api")).filter((f) => f.endsWith(".js") && !f.startsWith("_"));
